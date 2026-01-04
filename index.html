@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 微信专用meta标签 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no, email=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="renderer" content="webkit">
+
+<!-- 防止微信调整字体大小 -->
+<style>
+    body {
+        -webkit-text-size-adjust: 100% !important;
+        text-size-adjust: 100% !important;
+        -moz-text-size-adjust: 100% !important;
+    }
+</style>
+
+<!-- 禁止iOS点击延迟 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof FastClick !== 'undefined') {
+            FastClick.attach(document.body);
+        }
+    });
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>景区人流量监控 - 推荐区域显示</title>
@@ -140,4 +165,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
