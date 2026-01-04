@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景区人流量监控 - 推荐区域显示</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-map-marked-alt"></i> 景区人流量监控系统</h1>
+            <p class="subtitle">实时显示各区域人流密度，绿色为推荐游览区域，红色为不推荐</p>
+        </header>
+
+        <div class="content">
+            <div class="left-panel">
+                <div class="map-container">
+                    <svg class="scenic-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 区域A -->
+                        <polygon id="areaA" class="area recommended" points="150,100 300,50 450,150 350,250 200,200" data-area="A">
+                            <title>区域A - 人流密度: 适中 - 推荐游览</title>
+                        </polygon>
+                        
+                        <!-- 区域B -->
+                        <polygon id="areaB" class="area not-recommended" points="300,50 550,80 600,200 450,150" data-area="B">
+                            <title>区域B - 人流密度: 高 - 不推荐游览</title>
+                        </polygon>
+                        
+                        <!-- 区域C -->
+                        <polygon id="areaC" class="area recommended" points="450,150 600,200 550,400 400,350 350,250" data-area="C">
+                            <title>区域C - 人流密度: 低 - 推荐游览</title>
+                        </polygon>
+                        
+                        <!-- 区域D -->
+                        <polygon id="areaD" class="area not-recommended" points="150,100 200,200 350,250 400,350 250,450 100,350 80,200" data-area="D">
+                            <title>区域D - 人流密度: 高 - 不推荐游览</title>
+                        </polygon>
+                        
+                        <!-- 区域标签 -->
+                        <text x="250" y="150" class="area-label">A</text>
+                        <text x="450" y="120" class="area-label">B</text>
+                        <text x="450" y="300" class="area-label">C</text>
+                        <text x="200" y="350" class="area-label">D</text>
+                        
+                        <!-- 图例 -->
+                        <rect x="20" y="500" width="20" height="20" class="legend-recommended"/>
+                        <text x="50" y="515" class="legend-text">推荐区域 (人流适中)</text>
+                        
+                        <rect x="200" y="500" width="20" height="20" class="legend-not-recommended"/>
+                        <text x="230" y="515" class="legend-text">不推荐区域 (人流拥挤)</text>
+                    </svg>
+                    
+                    <div class="map-title">景区游览区域分布图</div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="info-card">
+                    <h2><i class="fas fa-info-circle"></i> 区域状态</h2>
+                    
+                    <div class="status-container">
+                        <div class="status-item recommended">
+                            <div class="status-header">
+                                <span class="area-badge">A区</span>
+                                <span class="status-indicator recommended">推荐</span>
+                            </div>
+                            <p class="status-desc">当前人流密度: <strong>适中</strong></p>
+                            <p class="status-time">更新时间: <span id="timeA">刚刚</span></p>
+                        </div>
+                        
+                        <div class="status-item not-recommended">
+                            <div class="status-header">
+                                <span class="area-badge">B区</span>
+                                <span class="status-indicator not-recommended">不推荐</span>
+                            </div>
+                            <p class="status-desc">当前人流密度: <strong>拥挤</strong></p>
+                            <p class="status-time">更新时间: <span id="timeB">刚刚</span></p>
+                        </div>
+                        
+                        <div class="status-item recommended">
+                            <div class="status-header">
+                                <span class="area-badge">C区</span>
+                                <span class="status-indicator recommended">推荐</span>
+                            </div>
+                            <p class="status-desc">当前人流密度: <strong>较少</strong></p>
+                            <p class="status-time">更新时间: <span id="timeC">刚刚</span></p>
+                        </div>
+                        
+                        <div class="status-item not-recommended">
+                            <div class="status-header">
+                                <span class="area-badge">D区</span>
+                                <span class="status-indicator not-recommended">不推荐</span>
+                            </div>
+                            <p class="status-desc">当前人流密度: <strong>拥挤</strong></p>
+                            <p class="status-time">更新时间: <span id="timeD">刚刚</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h2><i class="fas fa-chart-line"></i> 实时数据</h2>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="totalVisitors">1,245</div>
+                            <div class="stat-label">当前景区总人数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="recommendedAreas">2</div>
+                            <div class="stat-label">推荐区域数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="updateTime">15:30</div>
+                            <div class="stat-label">最后更新时间</div>
+                        </div>
+                    </div>
+                    
+                    <button id="refreshBtn" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> 刷新数据
+                    </button>
+                </div>
+                
+                <div class="info-card tips">
+                    <h2><i class="fas fa-lightbulb"></i> 游览建议</h2>
+                    <ul>
+                        <li>建议优先游览 <strong>绿色标记</strong> 区域</li>
+                        <li>避开高峰时段 (10:00-14:00)</li>
+                        <li>红色区域预计排队时间较长</li>
+                        <li>数据每5分钟自动更新</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>景区人流量监控系统 &copy; 2023 | 数据每5分钟更新一次 | 最后更新: <span id="lastUpdate">今天 15:30</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
