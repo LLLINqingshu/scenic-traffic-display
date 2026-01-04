@@ -1,105 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 微信专用meta标签 -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="format-detection" content="telephone=no, email=no">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<meta name="renderer" content="webkit">
-
-<!-- 防止微信调整字体大小 -->
-<style>
-    body {
-        -webkit-text-size-adjust: 100% !important;
-        text-size-adjust: 100% !important;
-        -moz-text-size-adjust: 100% !important;
-    }
-</style>
-
-<!-- 禁止iOS点击延迟 -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof FastClick !== 'undefined') {
-            FastClick.attach(document.body);
-        }
-    });
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>景区人流量监控 - 推荐区域显示</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-    // 在 script.js 中添加微信检测和优化
-function checkWeChatBrowser() {
-    const ua = navigator.userAgent.toLowerCase();
-    const isWeChat = ua.indexOf('micromessenger') !== -1;
-    
-    if (isWeChat) {
-        console.log('检测到微信浏览器，启用微信优化模式');
-        
-        // 添加微信专用样式
-        const wechatStyle = document.createElement('style');
-        wechatStyle.textContent = `
-            /* 微信专用优化 */
-            body {
-                -webkit-overflow-scrolling: touch !important;
-            }
-            
-            /* 修复微信中点击延迟 */
-            * {
-                -webkit-tap-highlight-color: rgba(0,0,0,0);
-            }
-            
-            /* 确保按钮在微信中可点击 */
-            button, .area {
-                cursor: pointer;
-            }
-            
-            /* 防止微信调整字体 */
-            body {
-                -webkit-text-size-adjust: 100% !important;
-                text-size-adjust: 100% !important;
-            }
-        `;
-        document.head.appendChild(wechatStyle);
-        
-        // 显示微信专用提示
-        showWeChatTips();
-    }
-    
-    return isWeChat;
-}
-
-function showWeChatTips() {
-    // 创建微信提示
-    const wechatTip = document.createElement('div');
-    wechatTip.className = 'wechat-tip';
-    wechatTip.innerHTML = `
-        <div style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
-            <div style="background: rgba(0,0,0,0.8); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; max-width: 150px;">
-                <i>💡 微信提示：点击右上角"..."可分享给朋友</i>
-            </div>
-        </div>
-    `;
-    
-    // 5秒后自动消失
-    document.body.appendChild(wechatTip);
-    setTimeout(() => {
-        if (wechatTip.parentNode) {
-            wechatTip.remove();
-        }
-    }, 5000);
-}
-
-// 在页面初始化时调用
-document.addEventListener('DOMContentLoaded', function() {
-    checkWeChatBrowser();
-    
-    // 原有的初始化代码...
-});
 <body>
     <div class="container">
         <header>
@@ -233,6 +140,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <script src="script.js"></script>
 </body>
-
 </html>
-
