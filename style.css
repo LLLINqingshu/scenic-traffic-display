@@ -319,7 +319,6 @@ footer p {
         flex-direction: column;
         gap: 20px;
     }
-
 }
 /* 确保SVG在微信中正确显示 */
 .scenic-map {
