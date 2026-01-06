@@ -2,16 +2,39 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>景区人流量监控 - 推荐区域显示</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 微信专用meta标签 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no, email=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    
+    <!-- 微信分享优化 -->
+    <meta property="og:title" content="景区人流量监控系统">
+    <meta property="og:description" content="实时查看景区ABCD区域人流密度，绿色舒适、黄色一般、红色拥挤">
+    <meta property="og:url" content="https://lllinqingshu.github.io/scenic-traffic-display/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="景区人流量监控">
+    
+    <style>
+        /* 防止微信调整字体大小 */
+        body {
+            -webkit-text-size-adjust: 100% !important;
+            text-size-adjust: 100% !important;
+            -moz-text-size-adjust: 100% !important;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1><i class="fas fa-map-marked-alt"></i> 景区人流量监控系统</h1>
-            <p class="subtitle">实时显示各区域人流密度，绿色为推荐游览区域，红色为不推荐</p>
+            <p class="subtitle">实时显示各区域人流密度，绿色舒适、黄色一般、红色拥挤</p>
         </header>
 
         <div class="content">
@@ -19,37 +42,40 @@
                 <div class="map-container">
                     <svg class="scenic-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
                         <!-- 区域A -->
-                        <polygon id="areaA" class="area recommended" points="150,100 300,50 450,150 350,250 200,200" data-area="A">
-                            <title>区域A - 人流密度: 适中 - 推荐游览</title>
+                        <polygon id="areaA" class="area" points="150,100 300,50 450,150 350,250 200,200" data-area="A">
+                            <title>区域A - 广场</title>
                         </polygon>
                         
                         <!-- 区域B -->
-                        <polygon id="areaB" class="area not-recommended" points="300,50 550,80 600,200 450,150" data-area="B">
-                            <title>区域B - 人流密度: 高 - 不推荐游览</title>
+                        <polygon id="areaB" class="area" points="300,50 550,80 600,200 450,150" data-area="B">
+                            <title>区域B - 观景台</title>
                         </polygon>
                         
                         <!-- 区域C -->
-                        <polygon id="areaC" class="area recommended" points="450,150 600,200 550,400 400,350 350,250" data-area="C">
-                            <title>区域C - 人流密度: 低 - 推荐游览</title>
+                        <polygon id="areaC" class="area" points="450,150 600,200 550,400 400,350 350,250" data-area="C">
+                            <title>区域C - 花园</title>
                         </polygon>
                         
                         <!-- 区域D -->
-                        <polygon id="areaD" class="area not-recommended" points="150,100 200,200 350,250 400,350 250,450 100,350 80,200" data-area="D">
-                            <title>区域D - 人流密度: 高 - 不推荐游览</title>
+                        <polygon id="areaD" class="area" points="150,100 200,200 350,250 400,350 250,450 100,350 80,200" data-area="D">
+                            <title>区域D - 步道</title>
                         </polygon>
                         
                         <!-- 区域标签 -->
-                        <text x="250" y="150" class="area-label">A</text>
-                        <text x="450" y="120" class="area-label">B</text>
-                        <text x="450" y="300" class="area-label">C</text>
-                        <text x="200" y="350" class="area-label">D</text>
+                        <text x="250" y="150" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">A</text>
+                        <text x="450" y="120" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">B</text>
+                        <text x="450" y="300" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">C</text>
+                        <text x="200" y="350" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">D</text>
                         
                         <!-- 图例 -->
-                        <rect x="20" y="500" width="20" height="20" class="legend-recommended"/>
-                        <text x="50" y="515" class="legend-text">推荐区域 (人流适中)</text>
+                        <rect x="20" y="500" width="20" height="20" style="fill:#2ecc71; stroke:white; stroke-width:2;"/>
+                        <text x="50" y="515" style="fill:#2c3e50; font-size:14px;">舒适 (<70%)</text>
                         
-                        <rect x="200" y="500" width="20" height="20" class="legend-not-recommended"/>
-                        <text x="230" y="515" class="legend-text">不推荐区域 (人流拥挤)</text>
+                        <rect x="150" y="500" width="20" height="20" style="fill:#f1c40f; stroke:white; stroke-width:2;"/>
+                        <text x="180" y="515" style="fill:#2c3e50; font-size:14px;">一般 (70-85%)</text>
+                        
+                        <rect x="280" y="500" width="20" height="20" style="fill:#e74c3c; stroke:white; stroke-width:2;"/>
+                        <text x="310" y="515" style="fill:#2c3e50; font-size:14px;">拥挤 (>85%)</text>
                     </svg>
                     
                     <div class="map-title">景区游览区域分布图</div>
@@ -61,40 +87,40 @@
                     <h2><i class="fas fa-info-circle"></i> 区域状态</h2>
                     
                     <div class="status-container">
-                        <div class="status-item recommended">
+                        <div class="status-item" data-area="A">
                             <div class="status-header">
-                                <span class="area-badge">A区</span>
-                                <span class="status-indicator recommended">推荐</span>
+                                <span class="area-badge">A区（广场）</span>
+                                <span class="status-indicator status-red">拥挤</span>
                             </div>
-                            <p class="status-desc">当前人流密度: <strong>适中</strong></p>
-                            <p class="status-time">更新时间: <span id="timeA">刚刚</span></p>
+                            <p class="status-desc">当前人数: <strong>120/300</strong> (40%)</p>
+                            <p class="status-time">预计排队: <span id="queueA">15</span>分钟</p>
                         </div>
                         
-                        <div class="status-item not-recommended">
+                        <div class="status-item" data-area="B">
                             <div class="status-header">
-                                <span class="area-badge">B区</span>
-                                <span class="status-indicator not-recommended">不推荐</span>
+                                <span class="area-badge">B区（观景台）</span>
+                                <span class="status-indicator status-red">已达上限</span>
                             </div>
-                            <p class="status-desc">当前人流密度: <strong>拥挤</strong></p>
-                            <p class="status-time">更新时间: <span id="timeB">刚刚</span></p>
+                            <p class="status-desc">当前人数: <strong>190/200</strong> (95%)</p>
+                            <p class="status-time">预计排队: <span id="queueB">25</span>分钟</p>
                         </div>
                         
-                        <div class="status-item recommended">
+                        <div class="status-item" data-area="C">
                             <div class="status-header">
-                                <span class="area-badge">C区</span>
-                                <span class="status-indicator recommended">推荐</span>
+                                <span class="area-badge">C区（花园）</span>
+                                <span class="status-indicator status-green">舒适</span>
                             </div>
-                            <p class="status-desc">当前人流密度: <strong>较少</strong></p>
-                            <p class="status-time">更新时间: <span id="timeC">刚刚</span></p>
+                            <p class="status-desc">当前人数: <strong>120/250</strong> (48%)</p>
+                            <p class="status-time">预计排队: <span id="queueC">5</span>分钟</p>
                         </div>
                         
-                        <div class="status-item not-recommended">
+                        <div class="status-item" data-area="D">
                             <div class="status-header">
-                                <span class="area-badge">D区</span>
-                                <span class="status-indicator not-recommended">不推荐</span>
+                                <span class="area-badge">D区（步道）</span>
+                                <span class="status-indicator status-yellow">一般</span>
                             </div>
-                            <p class="status-desc">当前人流密度: <strong>拥挤</strong></p>
-                            <p class="status-time">更新时间: <span id="timeD">刚刚</span></p>
+                            <p class="status-desc">当前人数: <strong>150/180</strong> (83%)</p>
+                            <p class="status-time">预计排队: <span id="queueD">10</span>分钟</p>
                         </div>
                     </div>
                 </div>
@@ -107,8 +133,8 @@
                             <div class="stat-label">当前景区总人数</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-value" id="recommendedAreas">2</div>
-                            <div class="stat-label">推荐区域数</div>
+                            <div class="stat-value" id="comfortableAreas">1</div>
+                            <div class="stat-label">舒适区域数</div>
                         </div>
                         <div class="stat">
                             <div class="stat-value" id="updateTime">15:30</div>
@@ -124,11 +150,50 @@
                 <div class="info-card tips">
                     <h2><i class="fas fa-lightbulb"></i> 游览建议</h2>
                     <ul>
-                        <li>建议优先游览 <strong>绿色标记</strong> 区域</li>
-                        <li>避开高峰时段 (10:00-14:00)</li>
-                        <li>红色区域预计排队时间较长</li>
-                        <li>数据每5分钟自动更新</li>
+                        <li><span class="color-dot green"></span> 绿色区域：舒适，推荐优先游览</li>
+                        <li><span class="color-dot yellow"></span> 黄色区域：一般，可选择性游览</li>
+                        <li><span class="color-dot red"></span> 红色区域：拥挤，建议避开</li>
+                        <li>点击地图区域查看详细信息和排队时间</li>
                     </ul>
+                </div>
+                
+                <div class="info-card qr-section">
+                    <h2><i class="fas fa-qrcode"></i> 扫码分享</h2>
+                    <div class="qr-display">
+                        <div id="qrCodeContainer" class="qr-code-container">
+                            <canvas id="qrCanvas" width="200" height="200"></canvas>
+                        </div>
+                        
+                        <div class="qr-info">
+                            <h3><i class="fas fa-mobile-alt"></i> 手机扫码查看</h3>
+                            <p>使用手机扫描二维码</p>
+                            <p>可在移动设备上实时查看</p>
+                            
+                            <div class="qr-stats">
+                                <div class="qr-stat">
+                                    <i class="fas fa-eye"></i>
+                                    <span>实时数据</span>
+                                </div>
+                                <div class="qr-stat">
+                                    <i class="fas fa-map-marked"></i>
+                                    <span>区域状态</span>
+                                </div>
+                                <div class="qr-stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>排队时间</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="qr-actions">
+                        <button id="downloadQR" class="qr-btn download-btn">
+                            <i class="fas fa-download"></i> 下载二维码
+                        </button>
+                        <button id="refreshQR" class="qr-btn refresh-qr-btn">
+                            <i class="fas fa-redo"></i> 刷新
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,6 +203,10 @@
         </footer>
     </div>
 
+    <!-- 二维码库 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <!-- 主脚本 -->
     <script src="script.js"></script>
 </body>
 </html>
