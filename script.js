@@ -63,6 +63,29 @@ let countdownIntervals = {};
 
 // ==================== 核心功能 ====================
 
+// 强制设置区域颜色（解决黑色显示问题）
+function forceSetAreaColors() {
+    console.log("强制设置地图颜色...");
+    
+    const areas = {
+        'areaA': '#e74c3c', // 红色
+        'areaB': '#e74c3c', // 红色
+        'areaC': '#2ecc71', // 绿色
+        'areaD': '#f1c40f'  // 黄色
+    };
+    
+    Object.keys(areas).forEach(areaId => {
+        const element = document.getElementById(areaId);
+        if (element) {
+            element.style.fill = areas[areaId];
+            element.style.stroke = 'white';
+            element.style.strokeWidth = '3px';
+            element.style.opacity = '0.9';
+            console.log(`已设置 ${areaId} 的颜色为 ${areas[areaId]}`);
+        }
+    });
+}
+
 // 计算区域状态
 function calculateAreaStatus() {
     Object.keys(areaData).forEach(key => {
@@ -126,12 +149,23 @@ function updateAreaStatus() {
             area.classList.add('area-red');
         }
         
+        // 直接设置内联样式确保颜色显示
+        if (data.color === 'green') {
+            area.style.fill = '#2ecc71';
+        } else if (data.color === 'yellow') {
+            area.style.fill = '#f1c40f';
+        } else if (data.color === 'red') {
+            area.style.fill = '#e74c3c';
+        }
+        
         // 如果是B区且达到上限，添加警告闪烁
         if (areaId === 'B' && data.warning) {
             area.classList.add('area-warning');
+            area.style.animation = 'blink 1s infinite';
             createCountdownOverlay(areaId, data.countdown);
         } else {
             removeCountdownOverlay(areaId);
+            area.style.animation = '';
         }
         
         // 更新tooltip
@@ -345,21 +379,32 @@ function setupAreaHoverEffects() {
     const areaElements = document.querySelectorAll('.area');
     
     areaElements.forEach(area => {
-        area.addEventListener('mouseenter', function() {
-            const areaId = this.getAttribute('data-area');
-            highlightArea(areaId, true);
-        });
+        // 移除可能重复的事件监听器
+        area.removeEventListener('mouseenter', handleMouseEnter);
+        area.removeEventListener('mouseleave', handleMouseLeave);
+        area.removeEventListener('click', handleClick);
         
-        area.addEventListener('mouseleave', function() {
-            const areaId = this.getAttribute('data-area');
-            highlightArea(areaId, false);
-        });
-        
-        area.addEventListener('click', function() {
-            const areaId = this.getAttribute('data-area');
-            showAreaDetails(areaId);
-        });
+        // 添加新的事件监听器
+        area.addEventListener('mouseenter', handleMouseEnter);
+        area.addEventListener('mouseleave', handleMouseLeave);
+        area.addEventListener('click', handleClick);
     });
+    
+    function handleMouseEnter() {
+        const areaId = this.getAttribute('data-area');
+        highlightArea(areaId, true);
+    }
+    
+    function handleMouseLeave() {
+        const areaId = this.getAttribute('data-area');
+        highlightArea(areaId, false);
+    }
+    
+    function handleClick() {
+        const areaId = this.getAttribute('data-area');
+        console.log(`点击了区域 ${areaId}`);
+        showAreaDetails(areaId);
+    }
 }
 
 // 高亮区域
@@ -397,16 +442,25 @@ function updateStatistics() {
     });
     
     // 更新总人数
-    document.getElementById('totalVisitors').textContent = totalVisitors.toLocaleString();
+    const totalVisitorsElement = document.getElementById('totalVisitors');
+    if (totalVisitorsElement) {
+        totalVisitorsElement.textContent = totalVisitors.toLocaleString();
+    }
     
     // 更新舒适区域数
-    document.getElementById('comfortableAreas').textContent = comfortableCount;
+    const comfortableAreasElement = document.getElementById('comfortableAreas');
+    if (comfortableAreasElement) {
+        comfortableAreasElement.textContent = comfortableCount;
+    }
     
     // 更新当前时间
     const now = new Date();
     const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
                       now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('updateTime').textContent = timeString;
+    const updateTimeElement = document.getElementById('updateTime');
+    if (updateTimeElement) {
+        updateTimeElement.textContent = timeString;
+    }
 }
 
 // 更新右侧状态项
@@ -469,7 +523,10 @@ function updateLastUpdateTime() {
     const dateStr = now.toLocaleDateString('zh-CN');
     const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
                    now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('lastUpdate').textContent = `${dateStr} ${timeStr}`;
+    const lastUpdateElement = document.getElementById('lastUpdate');
+    if (lastUpdateElement) {
+        lastUpdateElement.textContent = `${dateStr} ${timeStr}`;
+    }
 }
 
 // ==================== 刷新功能 ====================
@@ -510,127 +567,6 @@ function simulateDataRefresh() {
     
     // 显示刷新提示
     showNotification("数据已刷新", "success");
-}
-
-// ==================== 二维码功能 ====================
-
-// 生成二维码
-function generateQRCode() {
-    try {
-        let url = window.location.href;
-        
-        // 如果当前是本地文件，使用GitHub Pages URL
-        if (url.startsWith('file://')) {
-            url = "https://lllinqingshu.github.io/scenic-traffic-display/";
-        }
-        
-        const qrContainer = document.getElementById('qrCanvas');
-        if (!qrContainer) return;
-        
-        const ctx = qrContainer.getContext('2d');
-        ctx.clearRect(0, 0, qrContainer.width, qrContainer.height);
-        
-        QRCode.toCanvas(qrContainer, url, {
-            width: 170,
-            height: 170,
-            margin: 1,
-            color: {
-                dark: '#2c3e50',
-                light: '#ffffff'
-            },
-            errorCorrectionLevel: 'H'
-        }, function(error) {
-            if (error) {
-                console.error('生成二维码失败:', error);
-                showQRCodeError();
-            } else {
-                console.log('二维码生成成功:', url);
-                addLogoToQRCode();
-                setupQRButtons(url);
-            }
-        });
-        
-    } catch (error) {
-        console.error('二维码生成异常:', error);
-        showQRCodeError();
-    }
-}
-
-// 在二维码中心添加logo
-function addLogoToQRCode() {
-    const canvas = document.getElementById('qrCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    ctx.save();
-    
-    // 绘制白色背景
-    ctx.fillStyle = 'white';
-    ctx.fillRect(85, 85, 30, 30);
-    
-    // 绘制logo
-    ctx.fillStyle = '#9b59b6';
-    ctx.beginPath();
-    ctx.arc(100, 100, 12, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 16px FontAwesome';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('⛰', 100, 100);
-    
-    ctx.restore();
-}
-
-// 设置二维码按钮功能
-function setupQRButtons(url) {
-    // 下载按钮
-    const downloadBtn = document.getElementById('downloadQR');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', function() {
-            downloadQRCode(url);
-        });
-    }
-    
-    // 刷新按钮
-    const refreshBtn = document.getElementById('refreshQR');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            generateQRCode();
-            showNotification('二维码已刷新', 'success');
-        });
-    }
-}
-
-// 下载二维码
-function downloadQRCode(url) {
-    try {
-        const canvas = document.getElementById('qrCanvas');
-        const link = document.createElement('a');
-        link.download = `景区人流量监控-${new Date().toISOString().slice(0,10)}.png`;
-        link.href = canvas.toDataURL('image/png');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        showNotification('二维码下载成功！', 'success');
-    } catch (error) {
-        console.error('下载二维码失败:', error);
-        showNotification('下载失败，请重试', 'error');
-    }
-}
-
-// 显示二维码错误
-function showQRCodeError() {
-    const qrContainer = document.getElementById('qrCodeContainer');
-    if (qrContainer) {
-        qrContainer.innerHTML = `
-            <div style="text-align: center; padding: 20px; color: #e74c3c;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 40px;"></i>
-                <p style="margin-top: 10px;">生成二维码失败</p>
-            </div>
-        `;
-    }
 }
 
 // ==================== 通知功能 ====================
@@ -702,33 +638,33 @@ function updateAllData() {
 
 // 页面初始化
 function initPage() {
-    // 初始化数据
+    console.log("初始化页面...");
+    
+    // 1. 先强制设置区域颜色（解决黑色显示问题）
+    forceSetAreaColors();
+    
+    // 2. 初始化数据
     calculateAreaStatus();
     
-    // 更新所有显示
+    // 3. 更新所有显示
     updateAllData();
     
-    // 设置区域交互
+    // 4. 设置区域交互
     setupAreaHoverEffects();
     
-    // 更新最后更新时间
+    // 5. 更新最后更新时间
     updateLastUpdateTime();
     
-    // 生成二维码
-    setTimeout(() => {
-        generateQRCode();
-    }, 500);
-    
-    // 微信优化
+    // 6. 微信优化
     checkWeChatBrowser();
     
-    // 设置刷新按钮
+    // 7. 设置刷新按钮
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', simulateDataRefresh);
     }
     
-    // 模拟自动刷新（每30秒）
+    // 8. 模拟自动刷新（每30秒）
     setInterval(simulateDataRefresh, 30000);
     
     console.log('景区人流量监控系统初始化完成');
@@ -766,6 +702,12 @@ style.textContent = `
     @keyframes slideOut {
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
     }
 `;
 document.head.appendChild(style);
