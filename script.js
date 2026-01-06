@@ -60,6 +60,10 @@ const areaData = {
 
 // 倒计时定时器存储
 let countdownIntervals = {};
+// 自动更新定时器
+let autoUpdateTimer = null;
+// 下次更新时间（2分钟后）
+let nextUpdateTime = null;
 
 // ==================== 核心功能 ====================
 
@@ -67,21 +71,25 @@ let countdownIntervals = {};
 function forceSetAreaColors() {
     console.log("强制设置地图颜色...");
     
-    const areas = {
-        'areaA': '#e74c3c', // 红色
-        'areaB': '#e74c3c', // 红色
-        'areaC': '#2ecc71', // 绿色
-        'areaD': '#f1c40f'  // 黄色
+    const colors = {
+        'areaA': areaData.A.color === 'green' ? '#2ecc71' : 
+                areaData.A.color === 'yellow' ? '#f1c40f' : '#e74c3c',
+        'areaB': areaData.B.color === 'green' ? '#2ecc71' : 
+                areaData.B.color === 'yellow' ? '#f1c40f' : '#e74c3c',
+        'areaC': areaData.C.color === 'green' ? '#2ecc71' : 
+                areaData.C.color === 'yellow' ? '#f1c40f' : '#e74c3c',
+        'areaD': areaData.D.color === 'green' ? '#2ecc71' : 
+                areaData.D.color === 'yellow' ? '#f1c40f' : '#e74c3c'
     };
     
-    Object.keys(areas).forEach(areaId => {
+    Object.keys(colors).forEach(areaId => {
         const element = document.getElementById(areaId);
         if (element) {
-            element.style.fill = areas[areaId];
+            element.style.fill = colors[areaId];
             element.style.stroke = 'white';
             element.style.strokeWidth = '3px';
             element.style.opacity = '0.9';
-            console.log(`已设置 ${areaId} 的颜色为 ${areas[areaId]}`);
+            console.log(`已设置 ${areaId} 的颜色为 ${colors[areaId]}`);
         }
     });
 }
@@ -344,7 +352,7 @@ function showAreaDetails(areaId) {
                 ${recommendationHTML}
                 
                 <div style="margin-top: 20px; font-size: 12px; color: #95a5a6; text-align: center;">
-                    <i class="fas fa-info-circle"></i> 数据每5分钟更新一次
+                    <i class="fas fa-info-circle"></i> 数据每2分钟更新一次
                 </div>
             </div>
         </div>
@@ -379,47 +387,26 @@ function setupAreaHoverEffects() {
     const areaElements = document.querySelectorAll('.area');
     
     areaElements.forEach(area => {
-        // 移除可能重复的事件监听器
-        area.removeEventListener('mouseenter', handleMouseEnter);
-        area.removeEventListener('mouseleave', handleMouseLeave);
-        area.removeEventListener('click', handleClick);
+        // 确保每个区域都有正确的点击事件
+        area.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const areaId = this.getAttribute('data-area');
+            console.log(`点击了区域 ${areaId}`);
+            showAreaDetails(areaId);
+        });
         
-        // 添加新的事件监听器
-        area.addEventListener('mouseenter', handleMouseEnter);
-        area.addEventListener('mouseleave', handleMouseLeave);
-        area.addEventListener('click', handleClick);
+        area.addEventListener('mouseenter', function() {
+            const areaId = this.getAttribute('data-area');
+            this.style.filter = 'brightness(1.2) drop-shadow(0 0 8px rgba(0,0,0,0.3))';
+            this.style.transform = 'scale(1.02)';
+            this.style.transformOrigin = 'center';
+        });
+        
+        area.addEventListener('mouseleave', function() {
+            this.style.filter = '';
+            this.style.transform = '';
+        });
     });
-    
-    function handleMouseEnter() {
-        const areaId = this.getAttribute('data-area');
-        highlightArea(areaId, true);
-    }
-    
-    function handleMouseLeave() {
-        const areaId = this.getAttribute('data-area');
-        highlightArea(areaId, false);
-    }
-    
-    function handleClick() {
-        const areaId = this.getAttribute('data-area');
-        console.log(`点击了区域 ${areaId}`);
-        showAreaDetails(areaId);
-    }
-}
-
-// 高亮区域
-function highlightArea(areaId, isHighlighted) {
-    const area = document.getElementById(`area${areaId}`);
-    if (!area) return;
-    
-    if (isHighlighted) {
-        area.style.filter = 'brightness(1.2) drop-shadow(0 0 8px rgba(0,0,0,0.3))';
-        area.style.transform = 'scale(1.02)';
-        area.style.transformOrigin = 'center';
-    } else {
-        area.style.filter = '';
-        area.style.transform = '';
-    }
 }
 
 // ==================== 数据统计 ====================
@@ -454,13 +441,10 @@ function updateStatistics() {
     }
     
     // 更新当前时间
-    const now = new Date();
-    const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
-                      now.getMinutes().toString().padStart(2, '0');
-    const updateTimeElement = document.getElementById('updateTime');
-    if (updateTimeElement) {
-        updateTimeElement.textContent = timeString;
-    }
+    updateCurrentTime();
+    
+    // 更新下次更新时间
+    updateNextUpdateTime();
 }
 
 // 更新右侧状态项
@@ -492,7 +476,7 @@ function updateStatusItem(areaId, data) {
     }
     
     // 更新排队时间
-    const queueSpan = statusItem.querySelector('.status-time span');
+    const queueSpan = document.getElementById(`queue${areaId}`);
     if (queueSpan) {
         queueSpan.textContent = data.queueTime;
     }
@@ -515,6 +499,75 @@ function updateTimeStamps() {
             }
         }
     });
+}
+
+// 更新当前时间
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                      now.getMinutes().toString().padStart(2, '0');
+    const updateTimeElement = document.getElementById('updateTime');
+    if (updateTimeElement) {
+        updateTimeElement.textContent = timeString;
+    }
+}
+
+// 设置下次更新时间
+function setNextUpdateTime() {
+    const now = new Date();
+    // 2分钟后
+    nextUpdateTime = new Date(now.getTime() + 2 * 60 * 1000);
+    updateNextUpdateTime();
+    
+    // 启动倒计时
+    startUpdateCountdown();
+}
+
+// 更新下次更新时间显示
+function updateNextUpdateTime() {
+    if (!nextUpdateTime) {
+        setNextUpdateTime();
+        return;
+    }
+    
+    const now = new Date();
+    const diffMs = nextUpdateTime - now;
+    const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+    const diffSecs = Math.max(0, Math.floor((diffMs % 60000) / 1000));
+    
+    const nextUpdateElement = document.getElementById('nextUpdate');
+    if (nextUpdateElement) {
+        nextUpdateElement.textContent = `${diffMins}:${diffSecs.toString().padStart(2, '0')}`;
+    }
+    
+    const nextUpdateTimeElement = document.getElementById('nextUpdateTime');
+    if (nextUpdateTimeElement) {
+        if (diffMins > 0) {
+            nextUpdateTimeElement.textContent = `${diffMins}分钟后`;
+        } else {
+            nextUpdateTimeElement.textContent = `${diffSecs}秒后`;
+        }
+    }
+}
+
+// 启动更新倒计时
+function startUpdateCountdown() {
+    // 清除现有定时器
+    if (autoUpdateTimer) {
+        clearInterval(autoUpdateTimer);
+    }
+    
+    autoUpdateTimer = setInterval(() => {
+        updateNextUpdateTime();
+        
+        const now = new Date();
+        if (now >= nextUpdateTime) {
+            // 时间到，自动更新数据
+            simulateDataRefresh();
+            // 重置下次更新时间
+            setNextUpdateTime();
+        }
+    }, 1000);
 }
 
 // 更新最后更新时间
@@ -649,23 +702,27 @@ function initPage() {
     // 3. 更新所有显示
     updateAllData();
     
-    // 4. 设置区域交互
+    // 4. 设置区域交互（修复点击响应）
     setupAreaHoverEffects();
     
     // 5. 更新最后更新时间
     updateLastUpdateTime();
     
-    // 6. 微信优化
+    // 6. 设置下次更新时间并启动倒计时
+    setNextUpdateTime();
+    
+    // 7. 微信优化
     checkWeChatBrowser();
     
-    // 7. 设置刷新按钮
+    // 8. 设置刷新按钮
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', simulateDataRefresh);
+        refreshBtn.addEventListener('click', function() {
+            simulateDataRefresh();
+            // 重置下次更新时间
+            setNextUpdateTime();
+        });
     }
-    
-    // 8. 模拟自动刷新（每30秒）
-    setInterval(simulateDataRefresh, 30000);
     
     console.log('景区人流量监控系统初始化完成');
 }
