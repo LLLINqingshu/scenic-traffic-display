@@ -41,25 +41,21 @@
                     <svg class="scenic-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
                         <!-- 区域A - 直接添加内联样式确保显示 -->
                         <polygon id="areaA" class="area" 
-                                 style="fill:#e74c3c; stroke:white; stroke-width:3;"
                                  points="150,100 300,50 450,150 350,250 200,200" data-area="A">
                         </polygon>
                         
                         <!-- 区域B -->
                         <polygon id="areaB" class="area" 
-                                 style="fill:#e74c3c; stroke:white; stroke-width:3;"
                                  points="300,50 550,80 600,200 450,150" data-area="B">
                         </polygon>
                         
                         <!-- 区域C -->
                         <polygon id="areaC" class="area" 
-                                 style="fill:#2ecc71; stroke:white; stroke-width:3;"
                                  points="450,150 600,200 550,400 400,350 350,250" data-area="C">
                         </polygon>
                         
                         <!-- 区域D -->
                         <polygon id="areaD" class="area" 
-                                 style="fill:#f1c40f; stroke:white; stroke-width:3;"
                                  points="150,100 200,200 350,250 400,350 250,450 100,350 80,200" data-area="D">
                         </polygon>
                         
@@ -142,10 +138,14 @@
                             <div class="stat-value" id="updateTime">15:30</div>
                             <div class="stat-label">最后更新时间</div>
                         </div>
+                        <div class="stat">
+                            <div class="stat-value" id="nextUpdate">2:00</div>
+                            <div class="stat-label">下次更新</div>
+                        </div>
                     </div>
                     
                     <button id="refreshBtn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> 刷新数据
+                        <i class="fas fa-sync-alt"></i> 立即刷新数据
                     </button>
                 </div>
                 
@@ -156,13 +156,14 @@
                         <li><span class="color-dot yellow"></span> 黄色区域：一般，可选择性游览</li>
                         <li><span class="color-dot red"></span> 红色区域：拥挤，建议避开</li>
                         <li>点击地图区域查看详细信息和排队时间</li>
+                        <li>数据每2分钟自动更新一次</li>
                     </ul>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>景区人流量监控系统 &copy; 2023 | 数据每5分钟更新一次 | 最后更新: <span id="lastUpdate">今天 15:30</span></p>
+            <p>景区人流量监控系统 &copy; 2023 | 数据每2分钟自动更新 | 最后更新: <span id="lastUpdate">今天 15:30</span> | 下次更新: <span id="nextUpdateTime">2分钟后</span></p>
         </footer>
     </div>
 
