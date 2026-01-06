@@ -230,14 +230,14 @@ polygon.area {
 }
 
 .stat-value {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: bold;
     color: #3498db;
     margin-bottom: 5px;
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: #7f8c8d;
 }
 
@@ -514,7 +514,12 @@ footer p {
     }
     
     .stats {
-        flex-direction: column;
-        gap: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .stat {
+        flex: 1 0 calc(50% - 15px);
+        min-width: 100px;
     }
 }
