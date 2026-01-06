@@ -71,25 +71,33 @@ let nextUpdateTime = null;
 function forceSetAreaColors() {
     console.log("强制设置地图颜色...");
     
-    const colors = {
-        'areaA': areaData.A.color === 'green' ? '#2ecc71' : 
-                areaData.A.color === 'yellow' ? '#f1c40f' : '#e74c3c',
-        'areaB': areaData.B.color === 'green' ? '#2ecc71' : 
-                areaData.B.color === 'yellow' ? '#f1c40f' : '#e74c3c',
-        'areaC': areaData.C.color === 'green' ? '#2ecc71' : 
-                areaData.C.color === 'yellow' ? '#f1c40f' : '#e74c3c',
-        'areaD': areaData.D.color === 'green' ? '#2ecc71' : 
-                areaData.D.color === 'yellow' ? '#f1c40f' : '#e74c3c'
-    };
-    
-    Object.keys(colors).forEach(areaId => {
-        const element = document.getElementById(areaId);
-        if (element) {
-            element.style.fill = colors[areaId];
-            element.style.stroke = 'white';
-            element.style.strokeWidth = '3px';
-            element.style.opacity = '0.9';
-            console.log(`已设置 ${areaId} 的颜色为 ${colors[areaId]}`);
+    Object.keys(areaData).forEach(key => {
+        const area = document.getElementById(`area${key}`);
+        const data = areaData[key];
+        
+        if (area && data) {
+            // 移除所有颜色类
+            area.classList.remove('area-green', 'area-yellow', 'area-red', 'area-warning');
+            
+            // 根据颜色添加对应的类
+            if (data.color === 'green') {
+                area.classList.add('area-green');
+                area.style.fill = '#2ecc71';
+            } else if (data.color === 'yellow') {
+                area.classList.add('area-yellow');
+                area.style.fill = '#f1c40f';
+            } else if (data.color === 'red') {
+                area.classList.add('area-red');
+                area.style.fill = '#e74c3c';
+            }
+            
+            // 设置边框样式
+            area.style.stroke = 'white';
+            area.style.strokeWidth = '3px';
+            area.style.strokeOpacity = '1';
+            area.style.opacity = '0.9';
+            
+            console.log(`已设置 area${key} 的颜色为 ${data.color}`);
         }
     });
 }
@@ -136,8 +144,6 @@ function calculateAreaStatus() {
 
 // 更新区域状态显示
 function updateAreaStatus() {
-    calculateAreaStatus();
-    
     const areaElements = document.querySelectorAll('.area');
     areaElements.forEach(area => {
         const areaId = area.getAttribute('data-area');
@@ -151,20 +157,19 @@ function updateAreaStatus() {
         // 添加对应的颜色类
         if (data.color === 'green') {
             area.classList.add('area-green');
-        } else if (data.color === 'yellow') {
-            area.classList.add('area-yellow');
-        } else if (data.color === 'red') {
-            area.classList.add('area-red');
-        }
-        
-        // 直接设置内联样式确保颜色显示
-        if (data.color === 'green') {
             area.style.fill = '#2ecc71';
         } else if (data.color === 'yellow') {
+            area.classList.add('area-yellow');
             area.style.fill = '#f1c40f';
         } else if (data.color === 'red') {
+            area.classList.add('area-red');
             area.style.fill = '#e74c3c';
         }
+        
+        // 设置边框确保可见
+        area.style.stroke = 'white';
+        area.style.strokeWidth = '3px';
+        area.style.strokeOpacity = '1';
         
         // 如果是B区且达到上限，添加警告闪烁
         if (areaId === 'B' && data.warning) {
@@ -197,6 +202,7 @@ function createCountdownOverlay(areaId, countdown) {
     countdownElement.setAttribute("x", bbox.x + bbox.width / 2);
     countdownElement.setAttribute("y", bbox.y - 10);
     countdownElement.setAttribute("text-anchor", "middle");
+    countdownElement.setAttribute("dominant-baseline", "middle");
     countdownElement.textContent = `预计${countdown}分钟后恢复`;
     
     svg.appendChild(countdownElement);
@@ -396,15 +402,16 @@ function setupAreaHoverEffects() {
         });
         
         area.addEventListener('mouseenter', function() {
-            const areaId = this.getAttribute('data-area');
             this.style.filter = 'brightness(1.2) drop-shadow(0 0 8px rgba(0,0,0,0.3))';
             this.style.transform = 'scale(1.02)';
             this.style.transformOrigin = 'center';
+            this.style.strokeWidth = '4px';
         });
         
         area.addEventListener('mouseleave', function() {
             this.style.filter = '';
             this.style.transform = '';
+            this.style.strokeWidth = '3px';
         });
     });
 }
@@ -684,8 +691,19 @@ function checkWeChatBrowser() {
 
 // 更新所有数据
 function updateAllData() {
+    // 1. 重新计算状态
+    calculateAreaStatus();
+    
+    // 2. 强制设置区域颜色（确保颜色正确）
+    forceSetAreaColors();
+    
+    // 3. 更新区域状态显示
     updateAreaStatus();
+    
+    // 4. 更新统计信息
     updateStatistics();
+    
+    // 5. 更新时间戳
     updateTimeStamps();
 }
 
@@ -693,11 +711,11 @@ function updateAllData() {
 function initPage() {
     console.log("初始化页面...");
     
-    // 1. 先强制设置区域颜色（解决黑色显示问题）
-    forceSetAreaColors();
-    
-    // 2. 初始化数据
+    // 1. 初始化数据
     calculateAreaStatus();
+    
+    // 2. 强制设置区域颜色（解决黑色显示问题）
+    forceSetAreaColors();
     
     // 3. 更新所有显示
     updateAllData();
@@ -763,7 +781,7 @@ style.textContent = `
     
     @keyframes blink {
         0% { opacity: 1; }
-        50% { opacity: 0.5; }
+        50% { opacity: 0.6; }
         100% { opacity: 1; }
     }
 `;
