@@ -14,19 +14,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="renderer" content="webkit">
     
-    <!-- 微信分享优化 -->
-    <meta property="og:title" content="景区人流量监控系统">
-    <meta property="og:description" content="实时查看景区ABCD区域人流密度，绿色舒适、黄色一般、红色拥挤">
-    <meta property="og:url" content="https://lllinqingshu.github.io/scenic-traffic-display/">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="景区人流量监控">
-    
     <style>
         /* 防止微信调整字体大小 */
         body {
             -webkit-text-size-adjust: 100% !important;
             text-size-adjust: 100% !important;
             -moz-text-size-adjust: 100% !important;
+        }
+        
+        /* 确保SVG填充颜色优先级 */
+        .scenic-map polygon {
+            fill: #3498db; /* 默认蓝色，会被JS覆盖 */
         }
     </style>
 </head>
@@ -41,41 +39,45 @@
             <div class="left-panel">
                 <div class="map-container">
                     <svg class="scenic-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                        <!-- 区域A -->
-                        <polygon id="areaA" class="area" points="150,100 300,50 450,150 350,250 200,200" data-area="A">
-                            <title>区域A - 广场</title>
+                        <!-- 区域A - 直接添加内联样式确保显示 -->
+                        <polygon id="areaA" class="area" 
+                                 style="fill:#e74c3c; stroke:white; stroke-width:3;"
+                                 points="150,100 300,50 450,150 350,250 200,200" data-area="A">
                         </polygon>
                         
                         <!-- 区域B -->
-                        <polygon id="areaB" class="area" points="300,50 550,80 600,200 450,150" data-area="B">
-                            <title>区域B - 观景台</title>
+                        <polygon id="areaB" class="area" 
+                                 style="fill:#e74c3c; stroke:white; stroke-width:3;"
+                                 points="300,50 550,80 600,200 450,150" data-area="B">
                         </polygon>
                         
                         <!-- 区域C -->
-                        <polygon id="areaC" class="area" points="450,150 600,200 550,400 400,350 350,250" data-area="C">
-                            <title>区域C - 花园</title>
+                        <polygon id="areaC" class="area" 
+                                 style="fill:#2ecc71; stroke:white; stroke-width:3;"
+                                 points="450,150 600,200 550,400 400,350 350,250" data-area="C">
                         </polygon>
                         
                         <!-- 区域D -->
-                        <polygon id="areaD" class="area" points="150,100 200,200 350,250 400,350 250,450 100,350 80,200" data-area="D">
-                            <title>区域D - 步道</title>
+                        <polygon id="areaD" class="area" 
+                                 style="fill:#f1c40f; stroke:white; stroke-width:3;"
+                                 points="150,100 200,200 350,250 400,350 250,450 100,350 80,200" data-area="D">
                         </polygon>
                         
                         <!-- 区域标签 -->
-                        <text x="250" y="150" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">A</text>
-                        <text x="450" y="120" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">B</text>
-                        <text x="450" y="300" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">C</text>
-                        <text x="200" y="350" class="area-label" style="fill:white; font-size:28px; font-weight:bold;">D</text>
+                        <text x="250" y="150" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">A</text>
+                        <text x="450" y="120" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">B</text>
+                        <text x="450" y="300" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">C</text>
+                        <text x="200" y="350" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">D</text>
                         
                         <!-- 图例 -->
                         <rect x="20" y="500" width="20" height="20" style="fill:#2ecc71; stroke:white; stroke-width:2;"/>
-                        <text x="50" y="515" style="fill:#2c3e50; font-size:14px;">舒适 (<70%)</text>
+                        <text x="50" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">舒适 (<70%)</text>
                         
                         <rect x="150" y="500" width="20" height="20" style="fill:#f1c40f; stroke:white; stroke-width:2;"/>
-                        <text x="180" y="515" style="fill:#2c3e50; font-size:14px;">一般 (70-85%)</text>
+                        <text x="180" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">一般 (70-85%)</text>
                         
                         <rect x="280" y="500" width="20" height="20" style="fill:#e74c3c; stroke:white; stroke-width:2;"/>
-                        <text x="310" y="515" style="fill:#2c3e50; font-size:14px;">拥挤 (>85%)</text>
+                        <text x="310" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">拥挤 (>85%)</text>
                     </svg>
                     
                     <div class="map-title">景区游览区域分布图</div>
@@ -129,7 +131,7 @@
                     <h2><i class="fas fa-chart-line"></i> 实时数据</h2>
                     <div class="stats">
                         <div class="stat">
-                            <div class="stat-value" id="totalVisitors">1,245</div>
+                            <div class="stat-value" id="totalVisitors">580</div>
                             <div class="stat-label">当前景区总人数</div>
                         </div>
                         <div class="stat">
@@ -156,45 +158,6 @@
                         <li>点击地图区域查看详细信息和排队时间</li>
                     </ul>
                 </div>
-                
-                <div class="info-card qr-section">
-                    <h2><i class="fas fa-qrcode"></i> 扫码分享</h2>
-                    <div class="qr-display">
-                        <div id="qrCodeContainer" class="qr-code-container">
-                            <canvas id="qrCanvas" width="200" height="200"></canvas>
-                        </div>
-                        
-                        <div class="qr-info">
-                            <h3><i class="fas fa-mobile-alt"></i> 手机扫码查看</h3>
-                            <p>使用手机扫描二维码</p>
-                            <p>可在移动设备上实时查看</p>
-                            
-                            <div class="qr-stats">
-                                <div class="qr-stat">
-                                    <i class="fas fa-eye"></i>
-                                    <span>实时数据</span>
-                                </div>
-                                <div class="qr-stat">
-                                    <i class="fas fa-map-marked"></i>
-                                    <span>区域状态</span>
-                                </div>
-                                <div class="qr-stat">
-                                    <i class="fas fa-clock"></i>
-                                    <span>排队时间</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="qr-actions">
-                        <button id="downloadQR" class="qr-btn download-btn">
-                            <i class="fas fa-download"></i> 下载二维码
-                        </button>
-                        <button id="refreshQR" class="qr-btn refresh-qr-btn">
-                            <i class="fas fa-redo"></i> 刷新
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
         
@@ -203,9 +166,6 @@
         </footer>
     </div>
 
-    <!-- 二维码库 -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    
     <!-- 主脚本 -->
     <script src="script.js"></script>
 </body>
