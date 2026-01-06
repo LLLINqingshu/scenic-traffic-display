@@ -98,6 +98,11 @@ header h1 {
     filter: brightness(1.1);
 }
 
+/* 确保SVG填充颜色优先级 */
+polygon.area {
+    fill: inherit !important;
+}
+
 /* 三种状态的颜色 */
 .area-green {
     fill: #2ecc71 !important;
@@ -121,15 +126,6 @@ header h1 {
 .area-warning {
     animation: blink 1s infinite;
     filter: drop-shadow(0 0 5px #e74c3c);
-}
-
-.area-label {
-    font-size: 28px;
-    font-weight: bold;
-    fill: white;
-    pointer-events: none;
-    user-select: none;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* 倒计时样式 */
@@ -309,122 +305,6 @@ header h1 {
 
 .color-dot.red {
     background-color: #e74c3c;
-}
-
-/* 二维码区域样式 */
-.qr-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-top: 4px solid #9b59b6;
-}
-
-.qr-display {
-    display: flex;
-    gap: 20px;
-    margin: 20px 0;
-    align-items: center;
-}
-
-.qr-code-container {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e0e0e0;
-}
-
-#qrCanvas {
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-}
-
-.qr-info {
-    flex: 1;
-}
-
-.qr-info h3 {
-    color: #2c3e50;
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-
-.qr-info p {
-    color: #7f8c8d;
-    margin: 5px 0;
-    font-size: 14px;
-}
-
-.qr-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-    padding: 10px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.qr-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
-.qr-stat i {
-    font-size: 18px;
-    color: #3498db;
-}
-
-.qr-stat span {
-    font-size: 12px;
-    color: #7f8c8d;
-}
-
-.qr-actions {
-    display: flex;
-    gap: 10px;
-    margin: 20px 0;
-}
-
-.qr-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.download-btn {
-    background: linear-gradient(to right, #3498db, #2980b9);
-    color: white;
-}
-
-.download-btn:hover {
-    background: linear-gradient(to right, #2980b9, #2573a7);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-}
-
-.refresh-qr-btn {
-    background: linear-gradient(to right, #2ecc71, #27ae60);
-    color: white;
-}
-
-.refresh-qr-btn:hover {
-    background: linear-gradient(to right, #27ae60, #219653);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
 }
 
 /* 模态弹窗样式 */
@@ -636,22 +516,5 @@ footer p {
     .stats {
         flex-direction: column;
         gap: 20px;
-    }
-    
-    .qr-display {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .qr-stats {
-        justify-content: space-around;
-    }
-    
-    .qr-actions {
-        flex-wrap: wrap;
-    }
-    
-    .qr-btn {
-        min-width: 120px;
     }
 }
