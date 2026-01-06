@@ -83,49 +83,47 @@ header h1 {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 区域样式 */
+/* 区域样式 - 修改：确保SVG填充正确 */
 .area {
     stroke: white;
     stroke-width: 3;
+    stroke-opacity: 1;
     opacity: 0.9;
     cursor: pointer;
     transition: all 0.3s ease;
+    /* 移除继承的填充，由JavaScript控制 */
+    fill: #3498db; /* 默认蓝色 */
 }
 
 .area:hover {
     opacity: 1;
     stroke-width: 4;
-    filter: brightness(1.1);
+    filter: brightness(1.1) drop-shadow(0 0 5px rgba(0,0,0,0.2));
 }
 
-/* 确保SVG填充颜色优先级 */
-polygon.area {
-    fill: inherit !important;
-}
-
-/* 三种状态的颜色 */
-.area-green {
+/* 三种状态的颜色 - 确保优先级 */
+.area.area-green {
     fill: #2ecc71 !important;
 }
 
-.area-yellow {
+.area.area-yellow {
     fill: #f1c40f !important;
 }
 
-.area-red {
+.area.area-red {
     fill: #e74c3c !important;
 }
 
 /* 闪烁动画 - 用于B区警告 */
 @keyframes blink {
     0% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.6; }
     100% { opacity: 1; }
 }
 
-.area-warning {
+.area.area-warning {
     animation: blink 1s infinite;
-    filter: drop-shadow(0 0 5px #e74c3c);
+    filter: drop-shadow(0 0 8px #e74c3c);
 }
 
 /* 倒计时样式 */
@@ -136,7 +134,10 @@ polygon.area {
     text-anchor: middle;
     pointer-events: none;
     user-select: none;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    background-color: rgba(231, 76, 60, 0.9);
+    padding: 2px 8px;
+    border-radius: 4px;
 }
 
 .info-card {
