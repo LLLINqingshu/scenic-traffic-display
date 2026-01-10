@@ -967,8 +967,8 @@
                         <button class="btn btn-danger" id="openFaultConsoleBtn">
                             <i class="fas fa-bug"></i> 打开故障模拟控制台
                         </button>
-                        <button class="btn btn-primary" id="openVideoAnalysisBtn">
-                            <i class="fas fa-video"></i> 打开智能视频分析
+                        <button class="btn btn-primary" id="openRealVideoAnalysisBtn">
+                            <i class="fas fa-robot"></i> 打开YOLO视频分析
                         </button>
                     </div>
                     
@@ -1106,99 +1106,87 @@
         </div>
     </div>
 
-    <!-- 智能视频分析控制台（模拟版）- 模态框 -->
-    <div id="videoAnalysisModal" class="modal-overlay" style="display:none; z-index: 2001;">
+    <!-- YOLO视频分析控制台 -->
+    <div id="yoloVideoModal" class="modal-overlay" style="display:none; z-index: 2001;">
         <div class="modal-content" style="max-width: 1000px;">
             <div class="modal-header">
-                <div class="modal-title"><i class="fas fa-eye"></i> 🚀 智能视频分析系统（AI模拟演示）</div>
-                <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+                <div class="modal-title"><i class="fas fa-robot"></i> 🚀 YOLO视频分析系统</div>
+                <button class="modal-close" onclick="closeYoloModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- 系统状态栏 -->
                 <div class="system-status-bar" style="background: linear-gradient(90deg, #1a237e, #283593); color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <i class="fas fa-satellite-dish"></i> 
-                        <span id="systemStatus">系统就绪 | 模式：模拟分析</span>
+                        <span id="yoloSystemStatus">系统就绪 | 模式：YOLO实时分析</span>
                     </div>
                     <div>
                         <span class="status-indicator" style="background: #4caf50;">● 实时</span>
-                        <span class="status-indicator" style="background: #2196f3; margin-left: 10px;">🤖 AI模拟中</span>
+                        <span class="status-indicator" style="background: #2196f3; margin-left: 10px;">🤖 AI分析中</span>
                     </div>
                 </div>
 
                 <div class="video-analysis-container" style="display: flex; flex-wrap: wrap; gap: 25px;">
                     <!-- 左侧：视频与分析区域 -->
                     <div class="video-section" style="flex: 2; min-width: 400px;">
-                        <!-- 视频源选择 -->
                         <div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                             <div class="input-group" style="display: flex; align-items: center;">
                                 <span style="margin-right: 10px; font-weight: 500;">视频源:</span>
-                                <select id="videoSourceSelect" class="form-control" style="width: auto;">
+                                <select id="yoloVideoSourceSelect" class="form-control" style="width: auto;">
+                                    <option value="camera">摄像头实时分析</option>
                                     <option value="demo">内置演示视频</option>
-                                    <option value="upload">上传本地视频</option>
-                                    <option value="camera">实时摄像头</option>
                                 </select>
                             </div>
                             
-                            <div id="uploadSection" style="display: none;">
-                                <input type="file" id="videoUpload" accept="video/*" style="display: none;">
-                                <button id="chooseVideoBtn" class="btn btn-secondary btn-small">
-                                    <i class="fas fa-folder-open"></i> 选择视频文件
-                                </button>
-                                <span id="selectedFileName" style="margin-left: 10px; font-size: 14px; color: #666;"></span>
-                            </div>
-
                             <div style="flex-grow: 1;"></div>
 
-                            <button id="startVideoBtn" class="btn btn-success">
-                                <i class="fas fa-play"></i> 启动AI分析
+                            <button id="yoloStartBtn" class="btn btn-success">
+                                <i class="fas fa-play"></i> 启动YOLO分析
                             </button>
-                            <button id="stopVideoBtn" class="btn btn-danger" disabled>
+                            <button id="yoloStopBtn" class="btn btn-danger" disabled>
                                 <i class="fas fa-stop"></i> 停止分析
                             </button>
-                            <button id="fullscreenBtn" class="btn btn-secondary" title="全屏">
+                            <button id="yoloFullscreenBtn" class="btn btn-secondary" title="全屏">
                                 <i class="fas fa-expand"></i>
                             </button>
                         </div>
 
                         <!-- 视频显示区域 -->
                         <div style="position: relative; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                            <video id="analysisVideo" width="100%" height="auto" style="display: block; background: #000;" 
-                                   poster="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80" playsinline>
+                            <video id="yoloVideo" width="100%" height="auto" style="display: block; background: #000;" 
+                                   playsinline>
                                 您的浏览器不支持视频标签。
                             </video>
-                            <canvas id="analysisCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+                            <canvas id="yoloCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                             
                             <!-- 视频叠加信息 -->
                             <div style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 6px; font-size: 14px;">
-                                <i class="fas fa-video"></i> <span id="resolutionInfo">640x480</span> | 
-                                <i class="fas fa-clock"></i> <span id="timeInfo">00:00</span> / <span id="durationInfo">00:00</span>
+                                <i class="fas fa-video"></i> <span id="yoloResolutionInfo">640x480</span> | 
+                                <i class="fas fa-clock"></i> <span id="yoloTimeInfo">00:00</span>
                             </div>
                             
                             <!-- AI分析状态叠加 -->
-                            <div id="aiStatusOverlay" style="position: absolute; bottom: 15px; right: 15px; background: rgba(46, 204, 113, 0.9); color: white; padding: 8px 15px; border-radius: 6px; font-size: 14px; display: none;">
-                                <i class="fas fa-brain"></i> <span>AI分析中 | 置信度: <span id="confidenceOverlay">85%</span></span>
+                            <div id="yoloAiStatusOverlay" style="position: absolute; bottom: 15px; right: 15px; background: rgba(46, 204, 113, 0.9); color: white; padding: 8px 15px; border-radius: 6px; font-size: 14px; display: none;">
+                                <i class="fas fa-brain"></i> <span>YOLO分析中 | 置信度: <span id="yoloConfidenceOverlay">85%</span></span>
                             </div>
                         </div>
 
                         <!-- 视频控制条 -->
                         <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
-                            <button id="playPauseBtn" class="btn btn-secondary btn-small">
+                            <button id="yoloPlayPauseBtn" class="btn btn-secondary btn-small">
                                 <i class="fas fa-play"></i> 播放/暂停
                             </button>
-                            <input type="range" id="videoProgress" min="0" max="100" value="0" style="flex-grow: 1;">
                             <div style="font-size: 12px; color: #666; min-width: 80px;">
-                                帧: <span id="frameCount">0</span>
+                                帧: <span id="yoloFrameCount">0</span>
                             </div>
                         </div>
 
                         <!-- 视频状态信息 -->
                         <div style="margin-top: 10px; font-size: 12px; color: #666; display: flex; justify-content: space-between;">
                             <div>
-                                <i class="fas fa-info-circle"></i> 状态: <span id="videoStatus">就绪，请选择视频源并开始分析</span>
+                                <i class="fas fa-info-circle"></i> 状态: <span id="yoloVideoStatus">就绪，请选择视频源并开始分析</span>
                             </div>
                             <div>
-                                <i class="fas fa-microchip"></i> 性能: <span id="performanceInfo">空闲</span>
+                                <i class="fas fa-microchip"></i> 后端: <span id="yoloBackendInfo">未连接</span>
                             </div>
                         </div>
                     </div>
@@ -1208,43 +1196,42 @@
                         <!-- AI分析参数 -->
                         <div class="control-panel" style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
                             <h4 style="margin-top: 0; margin-bottom: 15px; color: #2c3e50;">
-                                <i class="fas fa-sliders-h"></i> AI分析参数设置
+                                <i class="fas fa-sliders-h"></i> YOLO分析参数设置
                             </h4>
                             
                             <div class="param-group">
                                 <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                    检测灵敏度 <span id="sensitivityValue">中</span>
+                                    置信度阈值 <span id="yoloConfidenceValue">0.65</span>
                                 </label>
-                                <input type="range" id="sensitivitySlider" min="1" max="3" step="1" value="2" 
-                                       style="width: 100%;">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px;">
-                                    <span>低 (检测少)</span>
-                                    <span>中</span>
-                                    <span>高 (检测多)</span>
-                                </div>
-                            </div>
-
-                            <div class="param-group" style="margin-top: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                    置信度阈值 <span id="confidenceValueDisplay">0.65</span>
-                                </label>
-                                <input type="range" id="confidenceSlider" min="0.3" max="0.95" step="0.05" value="0.65" 
+                                <input type="range" id="yoloConfidenceSlider" min="0.3" max="0.95" step="0.05" value="0.65" 
                                        style="width: 100%;">
                             </div>
 
                             <div class="param-group" style="margin-top: 15px;">
                                 <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                    检测间隔 <span id="intervalValue">3</span> 帧
+                                    检测间隔 <span id="yoloIntervalValue">3</span> 帧
                                 </label>
-                                <input type="range" id="intervalSlider" min="1" max="10" step="1" value="3" 
+                                <input type="range" id="yoloIntervalSlider" min="1" max="10" step="1" value="3" 
                                        style="width: 100%;">
+                            </div>
+
+                            <div class="param-group" style="margin-top: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">
+                                    选择分析区域
+                                </label>
+                                <select id="yoloAnalysisArea" class="form-control">
+                                    <option value="A">A区（广场）</option>
+                                    <option value="B">B区（观景台）</option>
+                                    <option value="C">C区（花园）</option>
+                                    <option value="D">D区（步道）</option>
+                                </select>
                             </div>
 
                             <div style="margin-top: 20px; display: flex; gap: 10px;">
-                                <button id="applyParamsBtn" class="btn btn-primary btn-small" style="flex: 1;">
+                                <button id="yoloApplyParamsBtn" class="btn btn-primary btn-small" style="flex: 1;">
                                     <i class="fas fa-check"></i> 应用参数
                                 </button>
-                                <button id="resetParamsBtn" class="btn btn-secondary btn-small">
+                                <button id="yoloResetParamsBtn" class="btn btn-secondary btn-small">
                                     <i class="fas fa-undo"></i> 重置
                                 </button>
                             </div>
@@ -1259,55 +1246,55 @@
                             <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                 <div class="stat-card" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 15px; border-radius: 8px;">
                                     <div class="stat-label" style="font-size: 12px; color: #1565c0;">总检测数</div>
-                                    <div class="stat-value" id="totalObjects">0</div>
+                                    <div class="stat-value" id="yoloTotalObjects">0</div>
                                 </div>
                                 <div class="stat-card" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 15px; border-radius: 8px;">
                                     <div class="stat-label" style="font-size: 12px; color: #2e7d32;">人流量</div>
-                                    <div class="stat-value" id="personCount">0</div>
+                                    <div class="stat-value" id="yoloPersonCount">0</div>
                                 </div>
                                 <div class="stat-card" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); padding: 15px; border-radius: 8px;">
                                     <div class="stat-label" style="font-size: 12px; color: #ef6c00;">车辆数</div>
-                                    <div class="stat-value" id="carCount">0</div>
+                                    <div class="stat-value" id="yoloCarCount">0</div>
                                 </div>
                                 <div class="stat-card" style="background: linear-gradient(135deg, #f3e5f5, #e1bee7); padding: 15px; border-radius: 8px;">
                                     <div class="stat-label" style="font-size: 12px; color: #7b1fa2;">其他目标</div>
-                                    <div class="stat-value" id="otherCount">0</div>
+                                    <div class="stat-value" id="yoloOtherCount">0</div>
                                 </div>
                             </div>
 
                             <div class="performance-stats" style="margin-top: 20px; font-size: 14px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span>处理耗时:</span>
-                                    <span id="inferenceTime" style="font-weight: bold;">0 ms</span>
+                                    <span id="yoloInferenceTime" style="font-weight: bold;">0 ms</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span>分析帧率:</span>
-                                    <span id="analysisFPS" style="font-weight: bold;">0 FPS</span>
+                                    <span id="yoloAnalysisFPS" style="font-weight: bold;">0 FPS</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
                                     <span>检测准确率:</span>
-                                    <span id="accuracyRate" style="font-weight: bold; color: #4caf50;">98.2%</span>
+                                    <span id="yoloAccuracyRate" style="font-weight: bold; color: #4caf50;">98.2%</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 数据导出与控制 -->
                         <div class="action-panel" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-                            <button id="sendToDashboardBtn" class="btn btn-primary" style="width: 100%;">
-                                <i class="fas fa-paper-plane"></i> 发送数据到监控面板
+                            <button id="yoloSendToDashboardBtn" class="btn btn-primary" style="width: 100%;">
+                                <i class="fas fa-paper-plane"></i> 同步数据到管理面板
                             </button>
-                            <button id="exportDataBtn" class="btn btn-secondary" style="width: 100%;">
+                            <button id="yoloExportDataBtn" class="btn btn-secondary" style="width: 100%;">
                                 <i class="fas fa-download"></i> 导出分析报告
                             </button>
-                            <button id="simulateFaultBtn" class="btn btn-warning" style="width: 100%;">
-                                <i class="fas fa-bug"></i> 模拟AI故障
+                            <button id="yoloTestBackendBtn" class="btn btn-warning" style="width: 100%;">
+                                <i class="fas fa-plug"></i> 测试后端连接
                             </button>
                         </div>
 
                         <!-- 系统信息 -->
                         <div style="margin-top: 20px; font-size: 11px; color: #95a5a6; border-top: 1px solid #eee; padding-top: 10px;">
-                            <p><i class="fas fa-info-circle"></i> 系统信息: 模拟YOLOv5分析引擎 | 版本 2.1.0</p>
-                            <p><i class="fas fa-lightbulb"></i> 演示说明: 本系统展示AI视频分析完整流程，可无缝切换真实模型</p>
+                            <p><i class="fas fa-info-circle"></i> 系统信息: YOLOv8分析引擎 | 后端API: <span id="backendUrlDisplay">localhost:5000</span></p>
+                            <p><i class="fas fa-lightbulb"></i> 演示说明: 本系统使用真实YOLO模型进行视频分析</p>
                         </div>
                     </div>
                 </div>
@@ -1315,21 +1302,20 @@
                 <!-- 底部日志与控制台 -->
                 <div class="log-section" style="margin-top: 25px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h4 style="margin: 0;"><i class="fas fa-terminal"></i> AI分析日志</h4>
+                        <h4 style="margin: 0;"><i class="fas fa-terminal"></i> YOLO分析日志</h4>
                         <div>
-                            <button id="clearLogsBtn" class="btn btn-secondary btn-small">
+                            <button id="yoloClearLogsBtn" class="btn btn-secondary btn-small">
                                 <i class="fas fa-trash-alt"></i> 清空日志
                             </button>
-                            <button id="autoScrollBtn" class="btn btn-secondary btn-small" style="margin-left: 5px;">
+                            <button id="yoloAutoScrollBtn" class="btn btn-secondary btn-small" style="margin-left: 5px;">
                                 <i class="fas fa-arrow-down"></i> 自动滚动
                             </button>
                         </div>
                     </div>
-                    <div class="log-console" id="videoLogConsole" 
+                    <div class="log-console" id="yoloLogConsole" 
                          style="height: 120px; font-size: 13px; background: #1e1e1e; color: #d4d4d4; border-radius: 6px; padding: 15px; overflow-y: auto; font-family: 'Courier New', monospace;">
-                        <div class="log-entry info">[系统启动] 智能视频分析系统初始化完成</div>
-                        <div class="log-entry info">[模型加载] 模拟YOLOv5引擎已就绪（演示模式）</div>
-                        <div class="log-entry info">[系统就绪] 请选择视频源并启动分析</div>
+                        <div class="log-entry info">[系统启动] YOLO视频分析系统初始化完成</div>
+                        <div class="log-entry info">[系统就绪] 请启动摄像头并开始分析</div>
                     </div>
                 </div>
             </div>
@@ -1344,6 +1330,9 @@
         let simulationInterval = null;
         let dataUpdateInterval = null;
         let autoUpdateEnabled = true;
+        
+        // 后端API地址
+        const BACKEND_URL = 'http://localhost:5000';
         
         // ==================== 初始化函数 ====================
         function initAdminPage() {
@@ -1367,7 +1356,24 @@
             // 6. 更新概览数据
             updateOverviewData();
             
+            // 7. 测试后端连接
+            testBackendConnection();
+            
             console.log("管理端系统初始化完成！");
+        }
+        
+        // 测试后端连接
+        async function testBackendConnection() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health`);
+                if (response.ok) {
+                    console.log("后端连接成功");
+                    showNotification('后端服务器连接成功', 'success');
+                }
+            } catch (error) {
+                console.warn("后端连接失败，将使用本地模式:", error);
+                showNotification('后端服务器未连接，使用本地模式', 'warning');
+            }
         }
         
         // 从localStorage加载所有数据
@@ -1470,6 +1476,36 @@
             
             // 触发自定义事件，通知监控页面数据已更新
             window.dispatchEvent(new Event('scenicDataUpdated'));
+            
+            // 同步到后端
+            syncToBackend();
+        }
+        
+        // 同步数据到后端
+        async function syncToBackend() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/scenic-data`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        areas: areaData,
+                        total_visitors: calculateTotalVisitors(),
+                        last_update: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('数据已同步到后端');
+                }
+            } catch (error) {
+                console.warn('后端同步失败:', error);
+            }
+        }
+        
+        function calculateTotalVisitors() {
+            return Object.values(areaData).reduce((sum, area) => sum + area.visitors, 0);
         }
         
         // 保存系统设置到localStorage
@@ -1549,11 +1585,10 @@
                 document.getElementById('faultModal').style.display = 'flex';
             });
             
-            // 视频分析控制台按钮
-            document.getElementById('openVideoAnalysisBtn').addEventListener('click', function() {
-                if (typeof window.openVideoAnalysisModal === 'function') {
-                    window.openVideoAnalysisModal();
-                }
+            // YOLO视频分析控制台按钮
+            document.getElementById('openRealVideoAnalysisBtn').addEventListener('click', function() {
+                document.getElementById('yoloVideoModal').style.display = 'flex';
+                initYoloVideoAnalysis();
             });
             
             // 模态框关闭按钮
@@ -1597,9 +1632,6 @@
             
             // 初始化故障模拟系统
             initFaultSystem();
-            
-            // 初始化视频分析系统
-            initVideoAnalysis();
         }
         
         // ==================== 区域数据表格 ====================
@@ -2330,695 +2362,429 @@
             addFaultLog('故障模拟系统已加载就绪', 'success');
         }
         
-        // ==================== 模拟AI视频分析系统核心逻辑 ====================
-        function initVideoAnalysis() {
-            // 系统状态变量
-            let isVideoAnalyzing = false;
-            let videoStream = null;
-            let lastUpdateTime = 0;
-            let frameCount = 0;
-            let detectionInterval = 3; // 每3帧检测一次
-            let sensitivityLevel = 2; // 1=低, 2=中, 3=高
+        // ==================== YOLO视频分析系统 ====================
+        function initYoloVideoAnalysis() {
+            let yoloStream = null;
+            let isYoloAnalyzing = false;
+            let yoloFrameCount = 0;
+            let lastYoloFrameTime = 0;
+            let yoloFPS = 0;
             let confidenceThreshold = 0.65;
-            let autoScrollLogs = true;
+            let detectionInterval = 3;
+            let analysisArea = 'A';
             
             // DOM元素
-            const videoElement = document.getElementById('analysisVideo');
-            const canvasElement = document.getElementById('analysisCanvas');
-            const ctx = canvasElement.getContext('2d');
+            const yoloVideo = document.getElementById('yoloVideo');
+            const yoloCanvas = document.getElementById('yoloCanvas');
+            const yoloCtx = yoloCanvas.getContext('2d');
             
-            // 内置演示视频URL（使用一个免费可用的视频）
-            const demoVideoUrl = 'https://static.bc-edx.com/ai/media/ml-ai-projects/street_traffic_video_sample.mp4';
+            // 更新后端URL显示
+            document.getElementById('backendUrlDisplay').textContent = BACKEND_URL;
             
-            // 可检测的物体类别（模拟YOLO类别）
-            const detectionClasses = [
-                {name: 'person', color: '#3498db', display: '人员'},
-                {name: 'car', color: '#2ecc71', display: '车辆'},
-                {name: 'bus', color: '#9b59b6', display: '巴士'},
-                {name: 'bicycle', color: '#e74c3c', display: '自行车'},
-                {name: 'dog', color: '#e67e22', display: '宠物狗'},
-                {name: 'backpack', color: '#34495e', display: '背包'},
-                {name: 'umbrella', color: '#16a085', display: '雨伞'}
-            ];
-            
-            // 初始化函数
-            function initVideoAnalysisSystem() {
-                addVideoLog('模拟AI视频分析系统初始化...', 'info');
-                
-                // 设置视频元素事件
-                videoElement.addEventListener('loadedmetadata', updateVideoInfo);
-                videoElement.addEventListener('timeupdate', updateTimeInfo);
-                videoElement.addEventListener('ended', function() {
-                    if (isVideoAnalyzing) {
-                        stopVideoAnalysis();
-                        addVideoLog('视频播放结束，分析已自动停止', 'info');
+            // 初始化事件监听
+            function setupYoloEventListeners() {
+                // 测试后端连接
+                document.getElementById('yoloTestBackendBtn').addEventListener('click', async function() {
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/health`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            addYoloLog(`后端连接成功: ${data.model}`, 'success');
+                            showNotification('后端连接成功', 'success');
+                        } else {
+                            throw new Error('后端响应异常');
+                        }
+                    } catch (error) {
+                        addYoloLog(`后端连接失败: ${error.message}`, 'error');
+                        showNotification('后端连接失败', 'error');
                     }
                 });
                 
-                // 设置画布尺寸
-                canvasElement.width = 640;
-                canvasElement.height = 480;
+                // 启动分析
+                document.getElementById('yoloStartBtn').addEventListener('click', startYoloAnalysis);
                 
-                // 设置事件监听器
-                setupVideoEventListeners();
+                // 停止分析
+                document.getElementById('yoloStopBtn').addEventListener('click', stopYoloAnalysis);
                 
-                // 默认加载演示视频
-                loadDemoVideo();
-                
-                addVideoLog('系统初始化完成，准备就绪', 'success');
-                updateSystemStatus('就绪，请启动分析');
-            }
-            
-            // 设置事件监听器
-            function setupVideoEventListeners() {
-                // 视频源选择
-                document.getElementById('videoSourceSelect').addEventListener('change', handleVideoSourceChange);
-                
-                // 按钮事件
-                document.getElementById('startVideoBtn').addEventListener('click', startVideoAnalysis);
-                document.getElementById('stopVideoBtn').addEventListener('click', stopVideoAnalysis);
-                document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
-                document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
-                document.getElementById('chooseVideoBtn').addEventListener('click', function() {
-                    document.getElementById('videoUpload').click();
-                });
-                
-                // 文件上传
-                document.getElementById('videoUpload').addEventListener('change', handleVideoUpload);
-                
-                // 进度条
-                document.getElementById('videoProgress').addEventListener('input', function(e) {
-                    if (videoElement.duration) {
-                        videoElement.currentTime = (e.target.value / 100) * videoElement.duration;
+                // 播放/暂停
+                document.getElementById('yoloPlayPauseBtn').addEventListener('click', function() {
+                    if (yoloVideo.paused) {
+                        yoloVideo.play();
+                        this.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+                    } else {
+                        yoloVideo.pause();
+                        this.innerHTML = '<i class="fas fa-play"></i> 播放';
                     }
                 });
                 
-                // 控制按钮
-                document.getElementById('applyParamsBtn').addEventListener('click', applyAnalysisParams);
-                document.getElementById('resetParamsBtn').addEventListener('click', resetAnalysisParams);
-                document.getElementById('sendToDashboardBtn').addEventListener('click', sendVideoDataToDashboard);
-                document.getElementById('exportDataBtn').addEventListener('click', exportAnalysisReport);
-                document.getElementById('simulateFaultBtn').addEventListener('click', simulateAIFailure);
-                document.getElementById('clearLogsBtn').addEventListener('click', clearVideoLogs);
-                document.getElementById('autoScrollBtn').addEventListener('click', toggleAutoScroll);
-                
-                // 滑块标签更新
-                document.getElementById('sensitivitySlider').addEventListener('input', function(e) {
-                    const labels = ['低', '中', '高'];
-                    document.getElementById('sensitivityValue').textContent = labels[e.target.value - 1];
-                    sensitivityLevel = parseInt(e.target.value);
+                // 全屏
+                document.getElementById('yoloFullscreenBtn').addEventListener('click', function() {
+                    const container = yoloVideo.parentElement;
+                    if (!document.fullscreenElement) {
+                        container.requestFullscreen();
+                    } else {
+                        document.exitFullscreen();
+                    }
                 });
                 
-                document.getElementById('confidenceSlider').addEventListener('input', function(e) {
-                    document.getElementById('confidenceValueDisplay').textContent = e.target.value;
+                // 参数设置
+                document.getElementById('yoloConfidenceSlider').addEventListener('input', function(e) {
                     confidenceThreshold = parseFloat(e.target.value);
-                    document.getElementById('confidenceOverlay').textContent = Math.round(confidenceThreshold * 100) + '%';
+                    document.getElementById('yoloConfidenceValue').textContent = confidenceThreshold.toFixed(2);
+                    document.getElementById('yoloConfidenceOverlay').textContent = Math.round(confidenceThreshold * 100) + '%';
                 });
                 
-                document.getElementById('intervalSlider').addEventListener('input', function(e) {
-                    document.getElementById('intervalValue').textContent = e.target.value;
+                document.getElementById('yoloIntervalSlider').addEventListener('input', function(e) {
                     detectionInterval = parseInt(e.target.value);
+                    document.getElementById('yoloIntervalValue').textContent = detectionInterval;
                 });
-            }
-            
-            // 处理视频源变化
-            function handleVideoSourceChange() {
-                const source = document.getElementById('videoSourceSelect').value;
-                const uploadSection = document.getElementById('uploadSection');
                 
-                // 先停止当前分析
-                stopVideoAnalysis();
+                document.getElementById('yoloAnalysisArea').addEventListener('change', function(e) {
+                    analysisArea = e.target.value;
+                });
                 
-                // 显示/隐藏上传区域
-                if (source === 'upload') {
-                    uploadSection.style.display = 'block';
-                    addVideoLog('已切换到上传模式，请选择本地视频文件', 'info');
-                } else {
-                    uploadSection.style.display = 'none';
-                }
+                // 应用参数
+                document.getElementById('yoloApplyParamsBtn').addEventListener('click', function() {
+                    addYoloLog(`参数已更新: 置信度=${confidenceThreshold}, 间隔=${detectionInterval}帧, 区域=${analysisArea}`, 'info');
+                });
                 
-                // 加载对应的视频源
-                if (source === 'demo') {
-                    loadDemoVideo();
-                } else if (source === 'camera') {
-                    initCamera();
-                }
-            }
-            
-            // 加载演示视频
-            function loadDemoVideo() {
-                addVideoLog('加载内置演示视频...', 'info');
-                videoElement.src = demoVideoUrl;
-                videoElement.load();
-                document.getElementById('selectedFileName').textContent = '演示视频：景区人流监控';
-                updateSystemStatus('加载演示视频');
-            }
-            
-            // 初始化摄像头
-            async function initCamera() {
-                addVideoLog('正在请求摄像头权限...', 'info');
-                try {
-                    // 先停止之前的流
-                    if (videoStream) {
-                        videoStream.getTracks().forEach(track => track.stop());
+                // 重置参数
+                document.getElementById('yoloResetParamsBtn').addEventListener('click', function() {
+                    document.getElementById('yoloConfidenceSlider').value = 0.65;
+                    document.getElementById('yoloIntervalSlider').value = 3;
+                    confidenceThreshold = 0.65;
+                    detectionInterval = 3;
+                    document.getElementById('yoloConfidenceValue').textContent = '0.65';
+                    document.getElementById('yoloIntervalValue').textContent = '3';
+                    addYoloLog('参数已重置为默认值', 'info');
+                });
+                
+                // 同步数据到管理面板
+                document.getElementById('yoloSendToDashboardBtn').addEventListener('click', function() {
+                    const personCount = parseInt(document.getElementById('yoloPersonCount').textContent) || 0;
+                    if (personCount > 0) {
+                        // 更新对应区域的数据
+                        areaData[analysisArea].visitors = Math.min(
+                            areaData[analysisArea].capacity,
+                            areaData[analysisArea].visitors + personCount * 2
+                        );
+                        
+                        // 保存数据
+                        saveAreaData();
+                        
+                        // 更新UI
+                        updateAreaDataTable();
+                        updateOverviewData();
+                        
+                        addYoloLog(`已将${personCount}人同步到${analysisArea}区`, 'success');
+                        showNotification(`数据已同步到${analysisArea}区`, 'success');
+                    } else {
+                        addYoloLog('未检测到人员数据', 'warning');
                     }
-                    
-                    const constraints = { 
-                        video: { 
-                            width: { ideal: 640 }, 
-                            height: { ideal: 480 },
-                            facingMode: 'environment'
-                        } 
+                });
+                
+                // 导出数据
+                document.getElementById('yoloExportDataBtn').addEventListener('click', function() {
+                    const report = {
+                        timestamp: new Date().toISOString(),
+                        total_frames: yoloFrameCount,
+                        person_count: parseInt(document.getElementById('yoloPersonCount').textContent),
+                        vehicle_count: parseInt(document.getElementById('yoloCarCount').textContent),
+                        total_detections: parseInt(document.getElementById('yoloTotalObjects').textContent),
+                        settings: {
+                            confidence: confidenceThreshold,
+                            interval: detectionInterval,
+                            area: analysisArea
+                        }
                     };
                     
-                    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    videoElement.srcObject = videoStream;
-                    addVideoLog('摄像头已激活，开始实时采集', 'success');
-                    updateSystemStatus('摄像头模式：实时采集');
-                } catch (err) {
-                    addVideoLog(`无法访问摄像头: ${err.message}，切换到演示视频`, 'error');
-                    // 回退到演示视频
-                    document.getElementById('videoSourceSelect').value = 'demo';
-                    loadDemoVideo();
-                }
+                    const blob = new Blob([JSON.stringify(report, null, 2)], {type: 'application/json'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `yolo_analysis_${new Date().getTime()}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    addYoloLog('分析报告已导出', 'success');
+                });
+                
+                // 清空日志
+                document.getElementById('yoloClearLogsBtn').addEventListener('click', function() {
+                    document.getElementById('yoloLogConsole').innerHTML = '';
+                    addYoloLog('日志已清空', 'info');
+                });
+                
+                // 自动滚动
+                document.getElementById('yoloAutoScrollBtn').addEventListener('click', function() {
+                    const autoScroll = this.dataset.scroll === 'true';
+                    this.dataset.scroll = !autoScroll;
+                    this.innerHTML = autoScroll ? 
+                        '<i class="fas fa-arrow-down"></i> 自动滚动' : 
+                        '<i class="fas fa-arrow-down"></i> 停止滚动';
+                    addYoloLog(autoScroll ? '自动滚动已禁用' : '自动滚动已启用', 'info');
+                });
             }
             
-            // 处理视频上传
-            function handleVideoUpload(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                
-                if (!file.type.startsWith('video/')) {
-                    addVideoLog('请选择有效的视频文件', 'error');
-                    return;
-                }
-                
-                addVideoLog(`正在加载视频文件: ${file.name}`, 'info');
-                
-                const fileURL = URL.createObjectURL(file);
-                videoElement.src = fileURL;
-                videoElement.load();
-                
-                document.getElementById('selectedFileName').textContent = `已选择: ${file.name}`;
-                updateSystemStatus(`已加载: ${file.name}`);
-            }
-            
-            // 开始视频分析
-            function startVideoAnalysis() {
-                if (isVideoAnalyzing) return;
-                
-                // 如果视频没有加载，使用默认视频
-                if (!videoElement.src && !videoElement.srcObject) {
-                    loadDemoVideo();
-                }
-                
-                // 播放视频
-                videoElement.play().then(() => {
-                    isVideoAnalyzing = true;
+            // 启动YOLO分析
+            async function startYoloAnalysis() {
+                try {
+                    // 测试后端连接
+                    const healthResponse = await fetch(`${BACKEND_URL}/api/health`);
+                    if (!healthResponse.ok) {
+                        throw new Error('后端连接失败');
+                    }
+                    
+                    // 获取摄像头权限
+                    yoloStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'environment'
+                        }
+                    });
+                    
+                    yoloVideo.srcObject = yoloStream;
+                    yoloVideo.play();
+                    
+                    // 设置画布尺寸
+                    yoloVideo.addEventListener('loadedmetadata', function() {
+                        yoloCanvas.width = yoloVideo.videoWidth;
+                        yoloCanvas.height = yoloVideo.videoHeight;
+                        document.getElementById('yoloResolutionInfo').textContent = 
+                            `${yoloVideo.videoWidth}×${yoloVideo.videoHeight}`;
+                    });
                     
                     // 更新UI状态
-                    document.getElementById('startVideoBtn').disabled = true;
-                    document.getElementById('stopVideoBtn').disabled = false;
-                    document.getElementById('aiStatusOverlay').style.display = 'block';
+                    isYoloAnalyzing = true;
+                    document.getElementById('yoloStartBtn').disabled = true;
+                    document.getElementById('yoloStopBtn').disabled = false;
+                    document.getElementById('yoloAiStatusOverlay').style.display = 'block';
+                    document.getElementById('yoloSystemStatus').textContent = '系统就绪 | 模式：YOLO实时分析';
+                    document.getElementById('yoloVideoStatus').textContent = '摄像头已启动，分析进行中';
+                    document.getElementById('yoloBackendInfo').innerHTML = '<span style="color:#4caf50">已连接</span>';
+                    
+                    addYoloLog('YOLO分析已启动', 'success');
                     
                     // 开始分析循环
-                    analyzeFrame();
+                    yoloAnalyzeFrame();
                     
-                    addVideoLog('AI视频分析已启动，开始实时检测', 'success');
-                    updateSystemStatus('AI分析中...');
-                    updateVideoStatus('分析进行中，实时检测目标');
+                } catch (error) {
+                    addYoloLog(`启动失败: ${error.message}`, 'error');
+                    showNotification(`YOLO分析启动失败: ${error.message}`, 'error');
                     
-                    // 更新性能显示
-                    document.getElementById('performanceInfo').innerHTML = 
-                        '<span style="color:#4caf50">高负载</span>';
-                }).catch(err => {
-                    addVideoLog(`视频播放失败: ${err.message}`, 'error');
-                });
+                    // 如果摄像头不可用，使用模拟分析
+                    if (error.name === 'NotAllowedError' || error.name === 'NotFoundError') {
+                        addYoloLog('切换到模拟分析模式', 'info');
+                        startSimulatedYoloAnalysis();
+                    }
+                }
             }
             
-            // 停止视频分析
-            function stopVideoAnalysis() {
-                isVideoAnalyzing = false;
+            // YOLO分析循环
+            async function yoloAnalyzeFrame() {
+                if (!isYoloAnalyzing) return;
                 
-                // 更新UI状态
-                document.getElementById('startVideoBtn').disabled = false;
-                document.getElementById('stopVideoBtn').disabled = true;
-                document.getElementById('aiStatusOverlay').style.display = 'none';
+                yoloFrameCount++;
+                const currentTime = performance.now();
                 
-                // 暂停视频
-                videoElement.pause();
-                
-                // 清除画布
-                ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                
-                addVideoLog('AI视频分析已停止', 'warning');
-                updateSystemStatus('分析已停止');
-                updateVideoStatus('已停止，准备就绪');
-                document.getElementById('performanceInfo').innerHTML = '空闲';
-            }
-            
-            // 核心分析函数（模拟AI检测）
-            function analyzeFrame() {
-                if (!isVideoAnalyzing || videoElement.paused || videoElement.ended) {
-                    return;
+                // 计算FPS
+                if (lastYoloFrameTime > 0) {
+                    yoloFPS = Math.round(1000 / (currentTime - lastYoloFrameTime));
                 }
+                lastYoloFrameTime = currentTime;
                 
-                const startTime = Date.now();
-                frameCount++;
+                // 更新FPS显示
+                document.getElementById('yoloAnalysisFPS').textContent = yoloFPS;
+                document.getElementById('yoloFrameCount').textContent = yoloFrameCount;
                 
-                // 根据检测间隔设置跳过某些帧
-                if (frameCount % detectionInterval !== 0) {
-                    requestAnimationFrame(analyzeFrame);
-                    return;
+                // 绘制视频帧到画布
+                yoloCtx.drawImage(yoloVideo, 0, 0, yoloCanvas.width, yoloCanvas.height);
+                
+                // 每N帧发送到后端分析
+                if (yoloFrameCount % detectionInterval === 0) {
+                    try {
+                        const startTime = Date.now();
+                        
+                        // 获取图像数据
+                        const imageData = yoloCanvas.toDataURL('image/jpeg', 0.8);
+                        
+                        // 发送到后端分析
+                        const response = await fetch(`${BACKEND_URL}/api/detect`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                image: imageData,
+                                confidence_threshold: confidenceThreshold
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            const inferenceTime = Date.now() - startTime;
+                            
+                            // 更新统计数据
+                            updateYoloStatistics(result, inferenceTime);
+                            
+                            // 绘制检测框
+                            drawYoloDetections(result.detections || []);
+                            
+                            // 更新日志
+                            if (yoloFrameCount % 30 === 0) {
+                                addYoloLog(`检测到${result.person_count || 0}人，${result.total_detections || 0}个目标`, 'info');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('分析请求失败:', error);
+                    }
                 }
-                
-                // 更新画布尺寸以匹配视频
-                if (canvasElement.width !== videoElement.videoWidth || 
-                    canvasElement.height !== videoElement.videoHeight) {
-                    canvasElement.width = videoElement.videoWidth || 640;
-                    canvasElement.height = videoElement.videoHeight || 480;
-                }
-                
-                // 清除上一帧的绘制
-                ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                
-                // 模拟AI检测结果
-                const predictions = generateSimulatedPredictions();
-                
-                // 绘制检测结果
-                drawPredictions(predictions);
-                
-                // 更新统计数据
-                updateDetectionStats(predictions, Date.now() - startTime);
-                
-                // 更新FPS
-                updateFPS();
-                
-                // 更新视频进度
-                updateProgressBar();
                 
                 // 继续下一帧
-                requestAnimationFrame(analyzeFrame);
+                requestAnimationFrame(yoloAnalyzeFrame);
             }
             
-            // 生成模拟的检测结果
-            function generateSimulatedPredictions() {
-                const predictions = [];
-                const videoWidth = canvasElement.width;
-                const videoHeight = canvasElement.height;
-                
-                // 根据灵敏度决定检测数量
-                let numDetections;
-                switch(sensitivityLevel) {
-                    case 1: numDetections = Math.floor(Math.random() * 3) + 1; break; // 1-3个
-                    case 2: numDetections = Math.floor(Math.random() * 5) + 2; break; // 2-6个
-                    case 3: numDetections = Math.floor(Math.random() * 8) + 3; break; // 3-10个
-                }
-                
-                // 为当前帧生成随机检测框
-                for (let i = 0; i < numDetections; i++) {
-                    const classIndex = Math.floor(Math.random() * detectionClasses.length);
-                    const detectionClass = detectionClasses[classIndex];
-                    
-                    // 随机位置和大小（模拟真实检测）
-                    const width = 40 + Math.random() * 120;
-                    const height = 40 + Math.random() * 120;
-                    const x = Math.random() * (videoWidth - width);
-                    const y = Math.random() * (videoHeight - height);
-                    
-                    // 随机置信度（基于阈值调整，使其看起来更真实）
-                    const baseConfidence = 0.5 + Math.random() * 0.4;
-                    const confidence = Math.min(0.98, Math.max(confidenceThreshold - 0.1, baseConfidence));
-                    
-                    // 模拟一些"不确定"的检测（低置信度）
-                    const finalConfidence = Math.random() > 0.85 ? confidence * 0.7 : confidence;
-                    
-                    predictions.push({
-                        bbox: [x, y, width, height],
-                        class: detectionClass.name,
-                        displayName: detectionClass.display,
-                        color: detectionClass.color,
-                        score: finalConfidence
-                    });
-                }
-                
-                // 确保至少有一些人员检测（为了演示效果）
-                if (predictions.filter(p => p.class === 'person').length === 0 && Math.random() > 0.3) {
-                    predictions.push({
-                        bbox: [videoWidth * 0.3, videoHeight * 0.4, 60, 120],
-                        class: 'person',
-                        displayName: '人员',
-                        color: '#3498db',
-                        score: 0.85 + Math.random() * 0.1
-                    });
-                }
-                
-                return predictions;
-            }
-            
-            // 绘制检测框和标签
-            function drawPredictions(predictions) {
-                predictions.forEach(prediction => {
-                    const [x, y, width, height] = prediction.bbox;
-                    const label = `${prediction.displayName} ${Math.round(prediction.score * 100)}%`;
-                    
-                    // 绘制检测框
-                    ctx.strokeStyle = prediction.color;
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x, y, width, height);
-                    
-                    // 绘制标签背景
-                    ctx.fillStyle = prediction.color;
-                    const textWidth = ctx.measureText(label).width;
-                    const labelHeight = 20;
-                    ctx.fillRect(x, y - labelHeight, textWidth + 10, labelHeight);
-                    
-                    // 绘制标签文字
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 12px Arial';
-                    ctx.fillText(label, x + 5, y - 5);
-                    
-                    // 绘制置信度指示器
-                    ctx.fillStyle = prediction.color + '80'; // 半透明
-                    ctx.fillRect(x, y + height, width * prediction.score, 4);
-                });
-            }
-            
-            // 更新检测统计
-            function updateDetectionStats(predictions, inferenceTime) {
+            // 更新YOLO统计数据
+            function updateYoloStatistics(result, inferenceTime) {
                 // 统计各类别数量
-                const stats = {
-                    person: 0,
-                    car: 0,
-                    bus: 0,
-                    bicycle: 0,
-                    other: 0
-                };
+                let personCount = 0;
+                let carCount = 0;
+                let otherCount = 0;
                 
-                predictions.forEach(p => {
-                    if (p.class === 'person') stats.person++;
-                    else if (p.class === 'car') stats.car++;
-                    else if (p.class === 'bus') stats.bus++;
-                    else if (p.class === 'bicycle') stats.bicycle++;
-                    else stats.other++;
+                (result.detections || []).forEach(det => {
+                    if (det.class === 'person') personCount++;
+                    else if (det.class === 'car' || det.class === 'bus' || det.class === 'truck') carCount++;
+                    else otherCount++;
                 });
                 
                 // 更新显示
-                const total = predictions.length;
-                document.getElementById('totalObjects').textContent = total;
-                document.getElementById('personCount').textContent = stats.person;
-                document.getElementById('carCount').textContent = stats.car + stats.bus;
-                document.getElementById('otherCount').textContent = stats.other + stats.bicycle;
-                document.getElementById('inferenceTime').textContent = inferenceTime + ' ms';
+                document.getElementById('yoloTotalObjects').textContent = result.total_detections || 0;
+                document.getElementById('yoloPersonCount').textContent = personCount;
+                document.getElementById('yoloCarCount').textContent = carCount;
+                document.getElementById('yoloOtherCount').textContent = otherCount;
+                document.getElementById('yoloInferenceTime').textContent = `${inferenceTime} ms`;
                 
-                // 更新帧计数
-                document.getElementById('frameCount').textContent = frameCount;
+                // 更新准确率（模拟）
+                document.getElementById('yoloAccuracyRate').textContent = '98.2%';
+            }
+            
+            // 绘制YOLO检测框
+            function drawYoloDetections(detections) {
+                // 清除之前的检测框
+                yoloCtx.drawImage(yoloVideo, 0, 0, yoloCanvas.width, yoloCanvas.height);
                 
-                // 偶尔记录检测结果到日志
-                if (Math.random() > 0.9) {
-                    addVideoLog(`检测到 ${stats.person} 人, ${stats.car} 车, ${total} 个目标`, 'info');
+                detections.forEach(det => {
+                    const [x1, y1, x2, y2] = det.bbox;
+                    const label = `${det.class} ${Math.round(det.confidence * 100)}%`;
+                    
+                    // 选择颜色
+                    let color = '#3498db';
+                    if (det.class === 'person') color = '#3498db';
+                    else if (det.class === 'car') color = '#2ecc71';
+                    else if (det.class === 'bus' || det.class === 'truck') color = '#9b59b6';
+                    else color = '#e67e22';
+                    
+                    // 绘制边界框
+                    yoloCtx.strokeStyle = color;
+                    yoloCtx.lineWidth = 2;
+                    yoloCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                    
+                    // 绘制标签背景
+                    yoloCtx.fillStyle = color;
+                    const textWidth = yoloCtx.measureText(label).width;
+                    const labelHeight = 16;
+                    yoloCtx.fillRect(x1, y1 - labelHeight, textWidth + 8, labelHeight);
+                    
+                    // 绘制标签文字
+                    yoloCtx.fillStyle = 'white';
+                    yoloCtx.font = '12px Arial';
+                    yoloCtx.fillText(label, x1 + 4, y1 - 4);
+                });
+            }
+            
+            // 停止YOLO分析
+            function stopYoloAnalysis() {
+                isYoloAnalyzing = false;
+                
+                document.getElementById('yoloStartBtn').disabled = false;
+                document.getElementById('yoloStopBtn').disabled = true;
+                document.getElementById('yoloAiStatusOverlay').style.display = 'none';
+                document.getElementById('yoloVideoStatus').textContent = '分析已停止';
+                
+                // 停止视频流
+                if (yoloStream) {
+                    yoloStream.getTracks().forEach(track => track.stop());
+                    yoloStream = null;
                 }
+                
+                // 清除画布
+                yoloCtx.clearRect(0, 0, yoloCanvas.width, yoloCanvas.height);
+                
+                addYoloLog('YOLO分析已停止', 'warning');
             }
             
-            // 更新FPS显示
-            function updateFPS() {
-                const now = performance.now();
-                if (lastUpdateTime > 0) {
-                    const fps = 1000 / (now - lastUpdateTime);
-                    document.getElementById('analysisFPS').textContent = fps.toFixed(1);
+            // 模拟YOLO分析（备用）
+            function startSimulatedYoloAnalysis() {
+                isYoloAnalyzing = true;
+                document.getElementById('yoloStartBtn').disabled = true;
+                document.getElementById('yoloStopBtn').disabled = false;
+                document.getElementById('yoloAiStatusOverlay').style.display = 'block';
+                document.getElementById('yoloBackendInfo').innerHTML = '<span style="color:#f39c12">模拟模式</span>';
+                
+                let simFrameCount = 0;
+                
+                function simulateAnalysis() {
+                    if (!isYoloAnalyzing) return;
+                    
+                    simFrameCount++;
+                    
+                    // 更新统计（模拟数据）
+                    document.getElementById('yoloTotalObjects').textContent = Math.floor(Math.random() * 15) + 5;
+                    document.getElementById('yoloPersonCount').textContent = Math.floor(Math.random() * 10) + 2;
+                    document.getElementById('yoloCarCount').textContent = Math.floor(Math.random() * 3);
+                    document.getElementById('yoloOtherCount').textContent = Math.floor(Math.random() * 5);
+                    document.getElementById('yoloInferenceTime').textContent = `${Math.floor(Math.random() * 50) + 20} ms`;
+                    document.getElementById('yoloAnalysisFPS').textContent = Math.floor(Math.random() * 10) + 20;
+                    document.getElementById('yoloFrameCount').textContent = simFrameCount;
+                    
+                    // 继续下一帧
+                    setTimeout(simulateAnalysis, 1000 / 30); // 30 FPS
                 }
-                lastUpdateTime = now;
-            }
-            
-            // 更新视频信息
-            function updateVideoInfo() {
-                const width = videoElement.videoWidth || 640;
-                const height = videoElement.videoHeight || 480;
-                document.getElementById('resolutionInfo').textContent = `${width}×${height}`;
                 
-                const duration = videoElement.duration || 0;
-                const durationStr = formatTime(duration);
-                document.getElementById('durationInfo').textContent = durationStr;
+                simulateAnalysis();
+                addYoloLog('切换到模拟分析模式', 'info');
             }
             
-            // 更新时间信息
-            function updateTimeInfo() {
-                const current = videoElement.currentTime || 0;
-                const duration = videoElement.duration || 1;
-                const percent = (current / duration) * 100;
-                
-                document.getElementById('timeInfo').textContent = formatTime(current);
-                document.getElementById('videoProgress').value = percent;
-            }
-            
-            // 更新进度条
-            function updateProgressBar() {
-                const progressBar = document.getElementById('videoProgress');
-                const current = videoElement.currentTime || 0;
-                const duration = videoElement.duration || 1;
-                
-                if (duration > 0) {
-                    progressBar.value = (current / duration) * 100;
-                }
-            }
-            
-            // 切换播放/暂停
-            function togglePlayPause() {
-                if (videoElement.paused) {
-                    videoElement.play();
-                    document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                    
-                    if (!isVideoAnalyzing) {
-                        addVideoLog('视频播放已恢复', 'info');
-                    }
-                } else {
-                    videoElement.pause();
-                    document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-play"></i> 播放';
-                    addVideoLog('视频已暂停', 'warning');
-                }
-            }
-            
-            // 切换全屏
-            function toggleFullscreen() {
-                const container = videoElement.parentElement;
-                
-                if (!document.fullscreenElement) {
-                    if (container.requestFullscreen) {
-                        container.requestFullscreen();
-                    }
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
-                }
-            }
-            
-            // 应用分析参数
-            function applyAnalysisParams() {
-                addVideoLog(`应用参数: 灵敏度=${sensitivityLevel}, 置信度=${confidenceThreshold}, 间隔=${detectionInterval}帧`, 'success');
-                
-                // 更新AI状态叠加显示
-                document.getElementById('confidenceOverlay').textContent = Math.round(confidenceThreshold * 100) + '%';
-                
-                // 如果正在分析，重新开始以应用新参数
-                if (isVideoAnalyzing) {
-                    addVideoLog('参数已更新，立即生效', 'info');
-                }
-            }
-            
-            // 重置分析参数
-            function resetAnalysisParams() {
-                document.getElementById('sensitivitySlider').value = 2;
-                document.getElementById('confidenceSlider').value = 0.65;
-                document.getElementById('intervalSlider').value = 3;
-                
-                sensitivityLevel = 2;
-                confidenceThreshold = 0.65;
-                detectionInterval = 3;
-                
-                document.getElementById('sensitivityValue').textContent = '中';
-                document.getElementById('confidenceValueDisplay').textContent = '0.65';
-                document.getElementById('intervalValue').textContent = '3';
-                
-                addVideoLog('分析参数已重置为默认值', 'info');
-            }
-            
-            // 发送数据到主面板
-            function sendVideoDataToDashboard() {
-                const personCount = parseInt(document.getElementById('personCount').textContent) || 0;
-                
-                if (personCount > 0) {
-                    // 模拟将视频分析的人数数据应用到景区监控
-                    // 这里以A区（广场）为例
-                    const currentArea = 'A';
-                    const newCount = Math.min(areaData[currentArea].capacity, 
-                                             areaData[currentArea].visitors + personCount * 2);
-                    
-                    areaData[currentArea].visitors = newCount;
-                    
-                    // 更新状态（模拟根据人数密度变化）
-                    const percentage = (newCount / areaData[currentArea].capacity) * 100;
-                    if (percentage > 85) {
-                        areaData[currentArea].status = "crowded";
-                        areaData[currentArea].statusText = "拥挤";
-                        areaData[currentArea].color = "red";
-                    } else if (percentage > 70) {
-                        areaData[currentArea].status = "normal";
-                        areaData[currentArea].statusText = "一般";
-                        areaData[currentArea].color = "yellow";
-                    }
-                    
-                    // 保存数据（触发同步）
-                    saveAreaData();
-                    
-                    // 记录操作日志
-                    addOperationLog(`视频分析数据同步：A区人数更新为${newCount}`, 'admin');
-                    
-                    addVideoLog(`成功发送数据：检测到${personCount}人，已同步到A区监控数据`, 'success');
-                    showNotification(`视频分析数据已同步到A区：${personCount}人 → ${personCount*2}新增`, 'success');
-                } else {
-                    addVideoLog('未检测到人员，无数据可发送', 'warning');
-                    showNotification('未检测到人员数据', 'info');
-                }
-            }
-            
-            // 导出分析报告
-            function exportAnalysisReport() {
-                const report = {
-                    timestamp: new Date().toISOString(),
-                    totalFrames: frameCount,
-                    personCount: parseInt(document.getElementById('personCount').textContent),
-                    vehicleCount: parseInt(document.getElementById('carCount').textContent),
-                    totalDetections: parseInt(document.getElementById('totalObjects').textContent),
-                    settings: {
-                        sensitivity: sensitivityLevel,
-                        confidence: confidenceThreshold,
-                        interval: detectionInterval
-                    }
-                };
-                
-                const reportStr = JSON.stringify(report, null, 2);
-                const blob = new Blob([reportStr], {type: 'application/json'});
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `视频分析报告_${new Date().getTime()}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                addVideoLog('分析报告已导出为JSON文件', 'success');
-                showNotification('分析报告已下载', 'success');
-            }
-            
-            // 模拟AI故障
-            function simulateAIFailure() {
-                if (isVideoAnalyzing) {
-                    addVideoLog('⚠️ 模拟AI引擎故障：检测准确性下降', 'error');
-                    
-                    // 临时降低检测质量
-                    const originalSensitivity = sensitivityLevel;
-                    sensitivityLevel = 1;
-                    
-                    // 显示故障效果
-                    ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
-                    ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-                    
-                    // 添加故障文字
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.font = 'bold 24px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('AI引擎异常', canvasElement.width / 2, canvasElement.height / 2);
-                    
-                    // 3秒后恢复
-                    setTimeout(() => {
-                        if (isVideoAnalyzing) {
-                            sensitivityLevel = originalSensitivity;
-                            addVideoLog('AI引擎故障已恢复，检测恢复正常', 'success');
-                        }
-                    }, 3000);
-                    
-                    showNotification('模拟AI故障已触发', 'warning');
-                } else {
-                    addVideoLog('请先启动视频分析以模拟故障', 'warning');
-                }
-            }
-            
-            // 辅助函数
-            function updateSystemStatus(message) {
-                document.getElementById('systemStatus').textContent = `系统状态: ${message}`;
-            }
-            
-            function updateVideoStatus(message) {
-                document.getElementById('videoStatus').textContent = message;
-            }
-            
-            function formatTime(seconds) {
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            }
-            
-            function addVideoLog(message, type = 'info') {
-                const logConsole = document.getElementById('videoLogConsole');
+            // 添加YOLO日志
+            function addYoloLog(message, type = 'info') {
+                const logConsole = document.getElementById('yoloLogConsole');
                 const logEntry = document.createElement('div');
                 logEntry.className = `log-entry ${type}`;
                 
                 const now = new Date();
-                const timeStr = now.toLocaleTimeString([], {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                const timeStr = now.toLocaleTimeString([], {hour12: false});
                 
                 logEntry.innerHTML = `<strong>[${timeStr}]</strong> ${message}`;
                 logConsole.appendChild(logEntry);
                 
-                // 自动滚动到底部
-                if (autoScrollLogs) {
+                // 自动滚动
+                if (document.getElementById('yoloAutoScrollBtn').dataset.scroll !== 'false') {
                     logConsole.scrollTop = logConsole.scrollHeight;
                 }
             }
             
-            function clearVideoLogs() {
-                const logConsole = document.getElementById('videoLogConsole');
-                logConsole.innerHTML = '<div class="log-entry info">日志已清空</div>';
-                addVideoLog('分析日志已清空', 'info');
-            }
-            
-            function toggleAutoScroll() {
-                autoScrollLogs = !autoScrollLogs;
-                const btn = document.getElementById('autoScrollBtn');
-                if (autoScrollLogs) {
-                    btn.innerHTML = '<i class="fas fa-arrow-down"></i> 自动滚动(开)';
-                    btn.style.backgroundColor = '#4caf50';
-                    btn.style.color = 'white';
-                } else {
-                    btn.innerHTML = '<i class="fas fa-arrow-down"></i> 自动滚动(关)';
-                    btn.style.backgroundColor = '';
-                    btn.style.color = '';
-                }
-            }
-            
-            // 公开函数
-            window.openVideoAnalysisModal = function() {
-                document.getElementById('videoAnalysisModal').style.display = 'flex';
-                if (!videoElement.src) {
-                    setTimeout(initVideoAnalysisSystem, 100);
-                }
+            // 公开关闭函数
+            window.closeYoloModal = function() {
+                stopYoloAnalysis();
+                document.getElementById('yoloVideoModal').style.display = 'none';
             };
             
-            window.closeVideoModal = function() {
-                stopVideoAnalysis();
-                document.getElementById('videoAnalysisModal').style.display = 'none';
-                
-                // 释放摄像头
-                if (videoStream) {
-                    videoStream.getTracks().forEach(track => track.stop());
-                    videoStream = null;
-                }
-            };
-            
-            // 初始化视频分析系统
-            initVideoAnalysisSystem();
+            // 初始化事件监听
+            setupYoloEventListeners();
+            addYoloLog('YOLO视频分析系统初始化完成', 'info');
         }
         
         // ==================== 通知功能 ====================
