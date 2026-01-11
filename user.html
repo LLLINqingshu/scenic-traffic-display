@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>景区人流量监控系统</title>
     
-    <!-- 内联CSS确保立即加载 -->
     <style>
         * {
             margin: 0;
@@ -91,7 +90,6 @@
             display: block;
         }
         
-        /* SVG区域样式 - 确保颜色显示 */
         .area {
             stroke: white !important;
             stroke-width: 3 !important;
@@ -102,7 +100,6 @@
             fill: #3498db;
         }
         
-        /* 颜色定义 */
         .area-green { fill: #2ecc71 !important; }
         .area-yellow { fill: #f1c40f !important; }
         .area-red { fill: #e74c3c !important; }
@@ -113,7 +110,6 @@
             filter: brightness(1.1);
         }
         
-        /* 警告动画 */
         @keyframes blink {
             0% { opacity: 1; }
             50% { opacity: 0.6; }
@@ -273,7 +269,6 @@
         .color-dot.yellow { background-color: #f1c40f; }
         .color-dot.red { background-color: #e74c3c; }
         
-        /* 模态弹窗样式 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -402,7 +397,6 @@
             margin-bottom: 8px;
         }
         
-        /* 通知样式 */
         .notification {
             position: fixed;
             top: 20px;
@@ -450,7 +444,6 @@
             margin-top: 20px;
         }
         
-        /* 响应式设计 */
         @media (max-width: 1100px) {
             .content {
                 flex-direction: column;
@@ -487,10 +480,8 @@
         }
     </style>
     
-    <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- 微信优化 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="format-detection" content="telephone=no, email=no">
@@ -505,39 +496,32 @@
         <div class="content">
             <div class="left-panel">
                 <div class="map-container">
-                    <!-- SVG地图 - 硬编码初始颜色 -->
                     <svg class="scenic-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                        <!-- 区域A - 红色 -->
                         <polygon id="areaA" class="area area-red" data-area="A"
                                 points="150,100 300,50 450,150 350,250 200,200"
                                 style="fill: #e74c3c; stroke: white; stroke-width: 3;">
                         </polygon>
                         
-                        <!-- 区域B - 红色 -->
                         <polygon id="areaB" class="area area-red" data-area="B"
                                 points="300,50 550,80 600,200 450,150"
                                 style="fill: #e74c3c; stroke: white; stroke-width: 3;">
                         </polygon>
                         
-                        <!-- 区域C - 绿色 -->
                         <polygon id="areaC" class="area area-green" data-area="C"
                                 points="450,150 600,200 550,400 400,350 350,250"
                                 style="fill: #2ecc71; stroke: white; stroke-width: 3;">
                         </polygon>
                         
-                        <!-- 区域D - 黄色 -->
                         <polygon id="areaD" class="area area-yellow" data-area="D"
                                 points="150,100 200,200 350,250 400,350 250,450 100,350 80,200"
                                 style="fill: #f1c40f; stroke: white; stroke-width: 3;">
                         </polygon>
                         
-                        <!-- 区域标签 -->
                         <text x="250" y="150" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">A</text>
                         <text x="450" y="120" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">B</text>
                         <text x="450" y="300" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">C</text>
                         <text x="200" y="350" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">D</text>
                         
-                        <!-- 图例 -->
                         <rect x="20" y="500" width="20" height="20" style="fill:#2ecc71; stroke:white; stroke-width:2;"/>
                         <text x="50" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">舒适 (<70%)</text>
                         
@@ -639,98 +623,187 @@
         </footer>
     </div>
 
-    <!-- 内联JavaScript - 所有功能都在这里 -->
     <script>
         // ==================== 数据模型 ====================
-        const areaData = {
-            A: { 
-                name: "广场",
-                capacity: 300,
-                visitors: 120,
-                queueTime: 15,
-                recommendedTime: "30分钟后",
-                status: "crowded",
-                statusText: "拥挤",
-                color: "red",
-                warning: false,
-                countdown: 0,
-                alternative: "C区（花园）"
-            },
-            B: { 
-                name: "观景台",
-                capacity: 200,
-                visitors: 190,
-                queueTime: 25,
-                recommendedTime: "40分钟后",
-                status: "warning",
-                statusText: "已达上限",
-                color: "red",
-                warning: true,
-                countdown: 20,
-                alternative: "C区（花园）"
-            },
-            C: { 
-                name: "花园",
-                capacity: 250,
-                visitors: 120,
-                queueTime: 5,
-                recommendedTime: "现在",
-                status: "comfortable",
-                statusText: "舒适",
-                color: "green",
-                warning: false,
-                countdown: 0,
-                alternative: ""
-            },
-            D: { 
-                name: "步道",
-                capacity: 180,
-                visitors: 150,
-                queueTime: 10,
-                recommendedTime: "15分钟后",
-                status: "normal",
-                statusText: "一般",
-                color: "yellow",
-                warning: false,
-                countdown: 0,
-                alternative: ""
-            }
-        };
-
-        // 倒计时定时器存储
+        let areaData = {};
         let countdownIntervals = {};
-        // 自动更新定时器
         let autoUpdateTimer = null;
-        // 下次更新时间
         let nextUpdateTime = null;
-
+        let lastDataTimestamp = 0;
+        let syncCheckInterval = null;
+        
+        // 存储键名（必须与admin.html中的一致）
+        const STORAGE_KEYS = {
+            AREA_DATA: 'scenic_traffic_area_data',
+            TIMESTAMP: 'scenic_traffic_last_update'
+        };
+        
+        // 获取默认区域数据（当localStorage中没有数据时使用）
+        function getDefaultAreaData() {
+            return {
+                A: { 
+                    name: "广场",
+                    capacity: 300,
+                    visitors: 120,
+                    queueTime: 15,
+                    recommendedTime: "30分钟后",
+                    status: "crowded",
+                    statusText: "拥挤",
+                    color: "red",
+                    warning: false,
+                    countdown: 0,
+                    alternative: "C区（花园）"
+                },
+                B: { 
+                    name: "观景台",
+                    capacity: 200,
+                    visitors: 190,
+                    queueTime: 25,
+                    recommendedTime: "40分钟后",
+                    status: "warning",
+                    statusText: "已达上限",
+                    color: "red",
+                    warning: true,
+                    countdown: 20,
+                    alternative: "C区（花园）"
+                },
+                C: { 
+                    name: "花园",
+                    capacity: 250,
+                    visitors: 120,
+                    queueTime: 5,
+                    recommendedTime: "现在",
+                    status: "comfortable",
+                    statusText: "舒适",
+                    color: "green",
+                    warning: false,
+                    countdown: 0,
+                    alternative: ""
+                },
+                D: { 
+                    name: "步道",
+                    capacity: 180,
+                    visitors: 150,
+                    queueTime: 10,
+                    recommendedTime: "15分钟后",
+                    status: "normal",
+                    statusText: "一般",
+                    color: "yellow",
+                    warning: false,
+                    countdown: 0,
+                    alternative: ""
+                }
+            };
+        }
+        
         // ==================== 核心功能 ====================
-
+        
         // 初始化页面
         function initPage() {
             console.log("初始化景区监控系统...");
             
-            // 1. 设置区域交互
+            // 1. 从localStorage加载数据
+            loadDataFromStorage();
+            
+            // 2. 设置区域交互
             setupAreaInteractions();
             
-            // 2. 更新所有数据（包括颜色）
+            // 3. 更新所有数据（包括颜色）
             updateAllData();
             
-            // 3. 更新时间显示
+            // 4. 更新时间显示
             updateTimeDisplay();
             
-            // 4. 设置下次更新时间
+            // 5. 设置下次更新时间
             setNextUpdateTime();
             
-            // 5. 设置刷新按钮
+            // 6. 设置刷新按钮
             document.getElementById('refreshBtn').addEventListener('click', refreshData);
             
-            // 6. 设置自动更新
-            startAutoUpdate();
+            // 7. 启动数据同步检查
+            startSyncCheck();
+            
+            // 8. 监听storage事件（跨标签页同步）
+            setupStorageListener();
             
             console.log("系统初始化完成！");
         }
-
+        
+        // 从localStorage加载数据
+        function loadDataFromStorage() {
+            const savedData = localStorage.getItem(STORAGE_KEYS.AREA_DATA);
+            const savedTimestamp = localStorage.getItem(STORAGE_KEYS.TIMESTAMP);
+            
+            if (savedData && savedTimestamp) {
+                try {
+                    const newData = JSON.parse(savedData);
+                    const timestamp = parseInt(savedTimestamp);
+                    
+                    // 如果数据比当前数据新，则更新
+                    if (timestamp > lastDataTimestamp) {
+                        lastDataTimestamp = timestamp;
+                        
+                        // 更新用户端的数据
+                        Object.keys(newData).forEach(key => {
+                            if (!areaData[key]) areaData[key] = {};
+                            
+                            // 更新所有字段
+                            Object.keys(newData[key]).forEach(field => {
+                                areaData[key][field] = newData[key][field];
+                            });
+                        });
+                        
+                        console.log('数据已从localStorage加载，时间戳:', timestamp);
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('解析数据失败:', error);
+                }
+            } else {
+                // 如果没有保存的数据，使用默认数据
+                areaData = getDefaultAreaData();
+                console.log('使用默认数据');
+            }
+            
+            return false;
+        }
+        
+        // 监听storage事件
+        function setupStorageListener() {
+            window.addEventListener('storage', function(e) {
+                if (e.key === STORAGE_KEYS.AREA_DATA || e.key === STORAGE_KEYS.TIMESTAMP) {
+                    console.log('检测到存储数据变化');
+                    if (loadDataFromStorage()) {
+                        updateAllData();
+                        showNotification('数据已自动更新', 'info');
+                    }
+                }
+            });
+        }
+        
+        // 启动同步检查
+        function startSyncCheck() {
+            // 每3秒检查一次数据更新
+            syncCheckInterval = setInterval(() => {
+                checkForDataUpdates();
+            }, 3000);
+        }
+        
+        // 检查数据更新
+        function checkForDataUpdates() {
+            const savedTimestamp = localStorage.getItem(STORAGE_KEYS.TIMESTAMP);
+            if (savedTimestamp) {
+                const timestamp = parseInt(savedTimestamp);
+                if (timestamp > lastDataTimestamp) {
+                    lastDataTimestamp = timestamp;
+                    if (loadDataFromStorage()) {
+                        updateAllData();
+                        console.log('检测到数据更新，已同步');
+                    }
+                }
+            }
+        }
+        
         // 更新所有数据
         function updateAllData() {
             updateAreaColors();
@@ -740,7 +813,7 @@
             // 检查B区是否需要警告
             checkWarning();
         }
-
+        
         // 设置区域颜色
         function updateAreaColors() {
             ['A', 'B', 'C', 'D'].forEach(areaId => {
@@ -748,6 +821,7 @@
                 if (!area) return;
                 
                 const data = areaData[areaId];
+                if (!data) return;
                 
                 // 移除所有颜色类
                 area.classList.remove('area-green', 'area-yellow', 'area-red', 'area-warning');
@@ -755,18 +829,12 @@
                 // 添加对应的颜色类
                 if (data.color === 'green') {
                     area.classList.add('area-green');
-                } else if (data.color === 'yellow') {
-                    area.classList.add('area-yellow');
-                } else if (data.color === 'red') {
-                    area.classList.add('area-red');
-                }
-                
-                // 直接设置内联样式（确保显示）
-                if (data.color === 'green') {
                     area.style.fill = '#2ecc71';
                 } else if (data.color === 'yellow') {
+                    area.classList.add('area-yellow');
                     area.style.fill = '#f1c40f';
                 } else if (data.color === 'red') {
+                    area.classList.add('area-red');
                     area.style.fill = '#e74c3c';
                 }
                 
@@ -776,7 +844,7 @@
                 area.style.opacity = '0.9';
             });
         }
-
+        
         // 设置区域交互
         function setupAreaInteractions() {
             const areas = document.querySelectorAll('.area');
@@ -803,7 +871,7 @@
                 });
             });
         }
-
+        
         // 更新tooltip
         function updateTooltips() {
             ['A', 'B', 'C', 'D'].forEach(areaId => {
@@ -811,6 +879,8 @@
                 if (!area) return;
                 
                 const data = areaData[areaId];
+                if (!data) return;
+                
                 const percentage = Math.round((data.visitors / data.capacity) * 100);
                 
                 area.setAttribute('title', 
@@ -822,11 +892,14 @@
                 );
             });
         }
-
+        
         // 检查B区警告
         function checkWarning() {
             const areaB = document.getElementById('areaB');
+            if (!areaB) return;
+            
             const data = areaData.B;
+            if (!data) return;
             
             if (data.warning) {
                 areaB.classList.add('area-warning');
@@ -836,7 +909,7 @@
                 removeCountdown('B');
             }
         }
-
+        
         // 启动倒计时
         function startCountdown(areaId, minutes) {
             removeCountdown(areaId);
@@ -867,10 +940,12 @@
                     clearInterval(interval);
                     removeCountdown(areaId);
                     
-                    // 更新B区状态
-                    areaData.B.warning = false;
-                    areaData.B.countdown = 0;
-                    updateAllData();
+                    // 更新B区状态（从数据中获取）
+                    if (areaData.B) {
+                        areaData.B.warning = false;
+                        areaData.B.countdown = 0;
+                        updateAllData();
+                    }
                     return;
                 }
                 
@@ -881,7 +956,7 @@
             
             countdownIntervals[areaId] = interval;
         }
-
+        
         // 移除倒计时
         function removeCountdown(areaId) {
             const element = document.getElementById(`countdown-${areaId}`);
@@ -892,12 +967,14 @@
                 delete countdownIntervals[areaId];
             }
         }
-
+        
         // ==================== 弹窗功能 ====================
-
+        
         // 显示区域详情
         function showAreaDetails(areaId) {
             const data = areaData[areaId];
+            if (!data) return;
+            
             const percentage = Math.round((data.visitors / data.capacity) * 100);
             
             // 创建模态框
@@ -976,7 +1053,7 @@
                         ${recommendationHTML}
                         
                         <div style="margin-top: 20px; font-size: 12px; color: #95a5a6; text-align: center;">
-                            <i class="fas fa-info-circle"></i> 数据每2分钟更新一次
+                            <i class="fas fa-info-circle"></i> 数据实时更新
                         </div>
                     </div>
                 </div>
@@ -1005,9 +1082,9 @@
             };
             document.addEventListener('keydown', closeOnEsc);
         }
-
+        
         // ==================== 数据统计 ====================
-
+        
         // 更新统计数据
         function updateStatistics() {
             let totalVisitors = 0;
@@ -1015,7 +1092,9 @@
             
             Object.keys(areaData).forEach(key => {
                 const data = areaData[key];
-                totalVisitors += data.visitors;
+                if (!data) return;
+                
+                totalVisitors += data.visitors || 0;
                 
                 if (data.status === "comfortable") {
                     comfortableCount++;
@@ -1032,7 +1111,7 @@
             // 更新时间
             updateCurrentTime();
         }
-
+        
         // 更新右侧状态项
         function updateStatusItem(areaId, data) {
             const statusItem = document.querySelector(`.status-item[data-area="${areaId}"]`);
@@ -1065,13 +1144,13 @@
                 queueSpan.textContent = data.queueTime;
             }
         }
-
+        
         // 更新时间显示
         function updateTimeDisplay() {
             updateCurrentTime();
             updateLastUpdateTime();
         }
-
+        
         // 更新当前时间
         function updateCurrentTime() {
             const now = new Date();
@@ -1079,7 +1158,7 @@
                            now.getMinutes().toString().padStart(2, '0');
             document.getElementById('updateTime').textContent = timeStr;
         }
-
+        
         // 更新最后更新时间
         function updateLastUpdateTime() {
             const now = new Date();
@@ -1088,17 +1167,17 @@
                            now.getMinutes().toString().padStart(2, '0');
             document.getElementById('lastUpdate').textContent = `${dateStr} ${timeStr}`;
         }
-
+        
         // ==================== 自动更新 ====================
-
+        
         // 设置下次更新时间
         function setNextUpdateTime() {
             const now = new Date();
-            nextUpdateTime = new Date(now.getTime() + 2 * 60 * 1000); // 2分钟后
+            nextUpdateTime = new Date(now.getTime() + 2 * 60 * 1000);
             updateNextUpdateTime();
             startUpdateCountdown();
         }
-
+        
         // 更新下次更新时间显示
         function updateNextUpdateTime() {
             if (!nextUpdateTime) return;
@@ -1113,7 +1192,7 @@
             document.getElementById('nextUpdateTime').textContent = 
                 diffMins > 0 ? `${diffMins}分钟后` : `${diffSecs}秒后`;
         }
-
+        
         // 启动更新倒计时
         function startUpdateCountdown() {
             if (autoUpdateTimer) clearInterval(autoUpdateTimer);
@@ -1123,81 +1202,26 @@
                 
                 const now = new Date();
                 if (now >= nextUpdateTime) {
-                    refreshData();
                     setNextUpdateTime();
                 }
             }, 1000);
         }
-
-        // 启动自动更新
-        function startAutoUpdate() {
-            // 每30秒检查一次数据变化
-            setInterval(() => {
-                simulateDataChange();
-            }, 30000);
-        }
-
+        
         // ==================== 数据刷新 ====================
-
+        
         // 刷新数据（按钮点击）
         function refreshData() {
-            simulateDataChange();
-            setNextUpdateTime();
-            showNotification('数据已刷新！', 'success');
+            if (loadDataFromStorage()) {
+                updateAllData();
+                setNextUpdateTime();
+                showNotification('数据已刷新！', 'success');
+            } else {
+                showNotification('已是最新数据', 'info');
+            }
         }
-
-        // 模拟数据变化
-        function simulateDataChange() {
-            Object.keys(areaData).forEach(key => {
-                const area = areaData[key];
-                
-                // 模拟人数变化
-                const change = Math.floor(Math.random() * 20) - 10;
-                area.visitors = Math.max(10, Math.min(area.capacity, area.visitors + change));
-                
-                // 重新计算状态
-                const percentage = (area.visitors / area.capacity) * 100;
-                
-                if (percentage < 70) {
-                    area.status = "comfortable";
-                    area.statusText = "舒适";
-                    area.color = "green";
-                    area.queueTime = Math.floor(Math.random() * 5) + 1;
-                    area.recommendedTime = "现在";
-                    area.warning = false;
-                } else if (percentage >= 70 && percentage <= 85) {
-                    area.status = "normal";
-                    area.statusText = "一般";
-                    area.color = "yellow";
-                    area.queueTime = Math.floor(Math.random() * 10) + 5;
-                    area.recommendedTime = "15分钟后";
-                    area.warning = false;
-                } else {
-                    area.status = "crowded";
-                    area.statusText = percentage > 95 ? "已达上限" : "拥挤";
-                    area.color = "red";
-                    area.queueTime = Math.floor(Math.random() * 15) + 10;
-                    area.recommendedTime = "30分钟后";
-                    
-                    // B区特殊处理
-                    if (key === 'B' && percentage > 95) {
-                        area.warning = true;
-                        if (!area.countdown || area.countdown <= 0) {
-                            area.countdown = 20;
-                        }
-                    } else {
-                        area.warning = false;
-                    }
-                }
-            });
-            
-            // 更新显示
-            updateAllData();
-            updateLastUpdateTime();
-        }
-
+        
         // ==================== 通知功能 ====================
-
+        
         // 显示通知
         function showNotification(message, type = 'success') {
             const oldNotification = document.querySelector('.notification');
@@ -1217,9 +1241,9 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
-
+        
         // ==================== 微信优化 ====================
-
+        
         function checkWeChatBrowser() {
             const ua = navigator.userAgent.toLowerCase();
             const isWeChat = ua.indexOf('micromessenger') !== -1;
@@ -1236,9 +1260,9 @@
                 document.head.appendChild(style);
             }
         }
-
+        
         // ==================== 启动 ====================
-
+        
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
             initPage();
@@ -1247,5 +1271,3 @@
     </script>
 </body>
 </html>
-
-
