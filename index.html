@@ -1,1659 +1,234 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>景区人流量监控系统</title>
-    
-    <!-- 内联CSS确保立即加载 -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(to right, #2c3e50, #4a6491);
-            color: white;
-            padding: 25px 40px;
-            border-bottom: 5px solid #3498db;
-        }
-        
-        header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        
-        .content {
-            display: flex;
-            padding: 30px;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .left-panel {
-            flex: 1;
-            min-width: 600px;
-        }
-        
-        .right-panel {
-            width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-        
-        .map-container {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid #eaeaea;
-        }
-        
-        .map-title {
-            text-align: center;
-            font-weight: bold;
-            margin-top: 15px;
-            color: #2c3e50;
-            font-size: 18px;
-        }
-        
-        .scenic-map {
-            width: 100%;
-            height: 500px;
-            display: block;
-        }
-        
-        /* SVG区域样式 - 确保颜色显示 */
-        .area {
-            stroke: white !important;
-            stroke-width: 3 !important;
-            stroke-opacity: 1 !important;
-            opacity: 0.9;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            fill: #3498db;
-        }
-        
-        /* 颜色定义 */
-        .area-green { fill: #2ecc71 !important; }
-        .area-yellow { fill: #f1c40f !important; }
-        .area-red { fill: #e74c3c !important; }
-        
-        .area:hover {
-            opacity: 1;
-            stroke-width: 4 !important;
-            filter: brightness(1.1);
-        }
-        
-        /* 警告动画 */
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-        
-        .area-warning {
-            animation: blink 1s infinite !important;
-        }
-        
-        .info-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border-top: 4px solid #3498db;
-        }
-        
-        .info-card h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .status-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .status-item {
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 5px solid;
-            background-color: rgba(248, 249, 250, 0.5);
-            transition: all 0.3s ease;
-        }
-        
-        .status-item:hover {
-            background-color: rgba(248, 249, 250, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-        
-        .status-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .area-badge {
-            background-color: #2c3e50;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .status-indicator {
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        
-        .status-green { background-color: #2ecc71; color: white; }
-        .status-yellow { background-color: #f1c40f; color: white; }
-        .status-red { background-color: #e74c3c; color: white; }
-        
-        .status-desc, .status-time {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-        }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #3498db;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 13px;
-            color: #7f8c8d;
-        }
-        
-        .refresh-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(to right, #3498db, #2980b9);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .refresh-btn:hover {
-            background: linear-gradient(to right, #2980b9, #2573a7);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-        }
-        
-        .tips ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        
-        .tips li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .tips li:before {
-            content: "✓";
-            color: #2ecc71;
-            font-weight: bold;
-        }
-        
-        .tips li:last-child {
-            border-bottom: none;
-        }
-        
-        .color-dot {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-        
-        .color-dot.green { background-color: #2ecc71; }
-        .color-dot.yellow { background-color: #f1c40f; }
-        .color-dot.red { background-color: #e74c3c; }
-        
-        /* 视频分析样式 */
-        .video-analysis-btn {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        .video-analysis-btn:hover {
-            background: linear-gradient(to right, #27ae60, #219653);
-            transform: translateY(-1px);
-        }
-        
-        .video-analysis-btn.disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-        
-        .video-analysis-btn.disabled:hover {
-            transform: none;
-            background: #95a5a6;
-        }
-        
-        /* 模态弹窗样式 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            overflow: hidden;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            padding: 20px;
-            background: #2c3e50;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.3s;
-        }
-        
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .detail-label {
-            color: #7f8c8d;
-            font-weight: 500;
-        }
-        
-        .detail-value {
-            color: #2c3e50;
-            font-weight: bold;
-        }
-        
-        .warning-section {
-            background: rgba(231, 76, 60, 0.1);
-            border-left: 4px solid #e74c3c;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
-        
-        .warning-title {
-            color: #e74c3c;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .warning-content {
-            color: #2c3e50;
-            line-height: 1.5;
-        }
-        
-        .warning-content p {
-            margin: 5px 0;
-        }
-        
-        .recommendation {
-            background: rgba(46, 204, 113, 0.1);
-            border-left: 4px solid #2ecc71;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-        
-        .recommendation-title {
-            color: #27ae60;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        /* 通知样式 */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideIn 0.3s ease;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .notification.success {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
-        }
-        
-        .notification.error {
-            background: linear-gradient(to right, #e74c3c, #c0392b);
-        }
-        
-        .notification.info {
-            background: linear-gradient(to right, #3498db, #2980b9);
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        footer {
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 1100px) {
-            .content {
-                flex-direction: column;
-            }
-            
-            .left-panel, .right-panel {
-                width: 100%;
-                min-width: auto;
-            }
-            
-            .scenic-map {
-                height: 400px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .content {
-                padding: 20px;
-            }
-            
-            .scenic-map {
-                height: 350px;
-            }
-            
-            .stats {
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-            
-            .stat {
-                flex: 1 0 calc(50% - 15px);
-                min-width: 100px;
-            }
-        }
-    </style>
-    
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- 微信优化 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no, email=no">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>景区失火自动报警灭火系统监控中心</title>
+<style>
+  body {
+    margin:0; font-family:"Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#0a1f3d,#051225);
+    color:#e6f4ff;
+  }
+  header {
+    background:#0c2f5c; padding:12px 24px;
+    display:flex; justify-content:space-between; align-items:center;
+    color:#fff; font-size:20px; font-weight:600;
+  }
+  .time { font-size:14px; color:#9dd1ff; }
+  .layout {
+    display:grid; grid-template-columns:260px 1fr 260px;
+    gap:12px; padding:12px;
+  }
+  .card {
+    background:rgba(0,40,80,0.6);
+    border-radius:8px;
+    padding:12px;
+    box-shadow:0 0 10px rgba(0,0,0,0.5) inset;
+  }
+  .card h3 {
+    margin:0 0 10px; font-size:16px; color:#4dc3ff;
+    border-left:3px solid #4dc3ff; padding-left:8px;
+  }
+  .status-item {
+    margin:6px 0; display:flex; justify-content:space-between;
+  }
+  .status-ok { color:#4dff88; }
+  .status-bad { color:#ff5555; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .region {
+    background:rgba(0,30,60,0.8);
+    border-radius:6px; padding:20px; text-align:center;
+  }
+  .region span {
+    display:inline-block; margin:6px; padding:12px;
+    background:#00cc88; border-radius:50%; color:#fff;
+  }
+  .stat-box { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat {
+    background:#002b55; border-radius:6px; padding:12px;
+    text-align:center; font-size:14px;
+  }
+  .stat strong { display:block; font-size:18px; color:#4dc3ff; }
+  .btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+  .btn {
+    padding:12px; border-radius:6px; text-align:center; cursor:pointer;
+    background:#004488; color:#fff; font-weight:600;
+  }
+  .btn.stop { background:#cc2222; }
+  .log { font-size:13px; background:#001b33; padding:10px; border-radius:6px; max-height:200px; overflow:auto; }
+
+  /* 左下角弹窗容器 */
+  .toast-container {
+    position:fixed; left:20px; bottom:20px;
+    display:flex; flex-direction:column;
+    gap:10px; z-index:9999;
+  }
+  .toast {
+    min-width:220px; max-width:320px;
+    padding:14px 16px; border-radius:8px;
+    font-weight:600; color:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    opacity:0; transform:translateY(10px);
+    animation:fadeIn .2s forwards;
+  }
+  @keyframes fadeIn { to {opacity:1; transform:translateY(0);} }
+  .toast.fire { background:linear-gradient(90deg,#ff3b3b,#ff6a6a); }
+  .toast.fire.old { background:#663333; color:#ffaaaa; }
+  .toast.nofire { background:linear-gradient(90deg,#28a745,#5cd65c); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-map-marked-alt"></i> 景区人流量监控系统</h1>
-            <p class="subtitle">实时显示各区域人流密度，绿色舒适、黄色一般、红色拥挤</p>
-        </header>
+<header>
+  <div>景区失火自动报警灭火系统监控中心</div>
+  <div class="time" id="time"></div>
+</header>
 
-        <div class="content">
-            <div class="left-panel">
-                <div class="map-container">
-                    <!-- SVG地图 - 硬编码初始颜色 -->
-                    <svg class="scenic-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                        <!-- 区域A - 红色 -->
-                        <polygon id="areaA" class="area area-red" data-area="A"
-                                points="150,100 300,50 450,150 350,250 200,200"
-                                style="fill: #e74c3c; stroke: white; stroke-width: 3;">
-                        </polygon>
-                        
-                        <!-- 区域B - 红色 -->
-                        <polygon id="areaB" class="area area-red" data-area="B"
-                                points="300,50 550,80 600,200 450,150"
-                                style="fill: #e74c3c; stroke: white; stroke-width: 3;">
-                        </polygon>
-                        
-                        <!-- 区域C - 绿色 -->
-                        <polygon id="areaC" class="area area-green" data-area="C"
-                                points="450,150 600,200 550,400 400,350 350,250"
-                                style="fill: #2ecc71; stroke: white; stroke-width: 3;">
-                        </polygon>
-                        
-                        <!-- 区域D - 黄色 -->
-                        <polygon id="areaD" class="area area-yellow" data-area="D"
-                                points="150,100 200,200 350,250 400,350 250,450 100,350 80,200"
-                                style="fill: #f1c40f; stroke: white; stroke-width: 3;">
-                        </polygon>
-                        
-                        <!-- 区域标签 -->
-                        <text x="250" y="150" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">A</text>
-                        <text x="450" y="120" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">B</text>
-                        <text x="450" y="300" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">C</text>
-                        <text x="200" y="350" style="fill:white; font-size:28px; font-weight:bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">D</text>
-                        
-                        <!-- 图例 -->
-                        <rect x="20" y="500" width="20" height="20" style="fill:#2ecc71; stroke:white; stroke-width:2;"/>
-                        <text x="50" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">舒适 (<70%)</text>
-                        
-                        <rect x="150" y="500" width="20" height="20" style="fill:#f1c40f; stroke:white; stroke-width:2;"/>
-                        <text x="180" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">一般 (70-85%)</text>
-                        
-                        <rect x="280" y="500" width="20" height="20" style="fill:#e74c3c; stroke:white; stroke-width:2;"/>
-                        <text x="310" y="515" style="fill:#2c3e50; font-size:14px; font-weight:bold;">拥挤 (>85%)</text>
-                    </svg>
-                    
-                    <div class="map-title">景区游览区域分布图</div>
-                </div>
-            </div>
-            
-            <div class="right-panel">
-                <div class="info-card">
-                    <h2><i class="fas fa-info-circle"></i> 区域状态</h2>
-                    
-                    <div class="status-container">
-                        <div class="status-item" data-area="A">
-                            <div class="status-header">
-                                <span class="area-badge">A区（广场）</span>
-                                <span class="status-indicator status-red">拥挤</span>
-                            </div>
-                            <p class="status-desc">当前人数: <strong>120/300</strong> (40%)</p>
-                            <p class="status-time">预计排队: <span id="queueA">15</span>分钟</p>
-                        </div>
-                        
-                        <div class="status-item" data-area="B">
-                            <div class="status-header">
-                                <span class="area-badge">B区（观景台）</span>
-                                <span class="status-indicator status-red">已达上限</span>
-                            </div>
-                            <p class="status-desc">当前人数: <strong>190/200</strong> (95%)</p>
-                            <p class="status-time">预计排队: <span id="queueB">25</span>分钟</p>
-                        </div>
-                        
-                        <div class="status-item" data-area="C">
-                            <div class="status-header">
-                                <span class="area-badge">C区（花园）</span>
-                                <span class="status-indicator status-green">舒适</span>
-                            </div>
-                            <p class="status-desc">当前人数: <strong>120/250</strong> (48%)</p>
-                            <p class="status-time">预计排队: <span id="queueC">5</span>分钟</p>
-                        </div>
-                        
-                        <div class="status-item" data-area="D">
-                            <div class="status-header">
-                                <span class="area-badge">D区（步道）</span>
-                                <span class="status-indicator status-yellow">一般</span>
-                            </div>
-                            <p class="status-desc">当前人数: <strong>150/180</strong> (83%)</p>
-                            <p class="status-time">预计排队: <span id="queueD">10</span>分钟</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="info-card">
-                    <h2><i class="fas fa-chart-line"></i> 实时数据</h2>
-                    <div class="stats">
-                        <div class="stat">
-                            <div class="stat-value" id="totalVisitors">580</div>
-                            <div class="stat-label">当前景区总人数</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="comfortableAreas">1</div>
-                            <div class="stat-label">舒适区域数</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="updateTime">15:30</div>
-                            <div class="stat-label">最后更新时间</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="nextUpdate">2:00</div>
-                            <div class="stat-label">下次更新</div>
-                        </div>
-                    </div>
-                    
-                    <button id="refreshBtn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> 立即刷新数据
-                    </button>
-                </div>
-                
-                <div class="info-card">
-                    <h2><i class="fas fa-robot"></i> AI视频分析</h2>
-                    <p style="margin-bottom: 15px; color: #666; font-size: 14px;">使用AI技术实时分析景区人流，自动更新数据</p>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <select id="aiAnalysisArea" class="form-control" style="flex: 1;">
-                            <option value="A">A区（广场）</option>
-                            <option value="B">B区（观景台）</option>
-                            <option value="C">C区（花园）</option>
-                            <option value="D">D区（步道）</option>
-                        </select>
-                        <button id="startAiAnalysisBtn" class="video-analysis-btn">
-                            <i class="fas fa-play"></i> 启动分析
-                        </button>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #3498db;" id="aiDetectedPeople">0</div>
-                                <div style="font-size: 12px; color: #666;">检测人数</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #2ecc71;" id="aiConfidence">85%</div>
-                                <div style="font-size: 12px; color: #666;">置信度</div>
-                            </div>
-                        </div>
-                        
-                        <div style="font-size: 12px; color: #666; margin-top: 10px;">
-                            <i class="fas fa-info-circle"></i> 状态: <span id="aiStatusText">等待启动</span>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 15px; font-size: 12px; color: #95a5a6;">
-                        <i class="fas fa-lightbulb"></i> AI分析结果将自动更新对应区域的人数数据
-                    </div>
-                </div>
-                
-                <div class="info-card tips">
-                    <h2><i class="fas fa-lightbulb"></i> 游览建议</h2>
-                    <ul>
-                        <li><span class="color-dot green"></span> 绿色区域：舒适，推荐优先游览</li>
-                        <li><span class="color-dot yellow"></span> 黄色区域：一般，可选择性游览</li>
-                        <li><span class="color-dot red"></span> 红色区域：拥挤，建议避开</li>
-                        <li>点击地图区域查看详细信息和排队时间</li>
-                        <li>数据每2分钟自动更新一次</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <footer>
-            <p>景区人流量监控系统 &copy; 2023 | 数据每2分钟自动更新 | 最后更新: <span id="lastUpdate">今天 15:30</span> | 下次更新: <span id="nextUpdateTime">2分钟后</span></p>
-        </footer>
+<div class="layout">
+  <!-- 左侧 -->
+  <div>
+    <div class="card">
+      <h3>系统状态总览</h3>
+      <div class="status-item"><span>系统状态</span><span class="status-ok">正常</span></div>
+      <div class="status-item"><span>平均温度</span><span>25.4℃</span></div>
+      <div class="status-item"><span>湿度</span><span>2.5%</span></div>
+      <div class="status-item"><span>灭火泵压力</span><span>1.2MPa</span></div>
     </div>
+    <div class="card" style="margin-top:12px;">
+      <h3>报警记录</h3>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
 
-    <!-- 内联JavaScript - 所有功能都在这里 -->
-    <script>
-        // ==================== 数据模型 ====================
-        const areaData = {
-            A: { 
-                name: "广场",
-                capacity: 300,
-                visitors: 120,
-                queueTime: 15,
-                recommendedTime: "30分钟后",
-                status: "crowded",
-                statusText: "拥挤",
-                color: "red",
-                warning: false,
-                countdown: 0,
-                alternative: "C区（花园）"
-            },
-            B: { 
-                name: "观景台",
-                capacity: 200,
-                visitors: 190,
-                queueTime: 25,
-                recommendedTime: "40分钟后",
-                status: "warning",
-                statusText: "已达上限",
-                color: "red",
-                warning: true,
-                countdown: 20,
-                alternative: "C区（花园）"
-            },
-            C: { 
-                name: "花园",
-                capacity: 250,
-                visitors: 120,
-                queueTime: 5,
-                recommendedTime: "现在",
-                status: "comfortable",
-                statusText: "舒适",
-                color: "green",
-                warning: false,
-                countdown: 0,
-                alternative: ""
-            },
-            D: { 
-                name: "步道",
-                capacity: 180,
-                visitors: 150,
-                queueTime: 10,
-                recommendedTime: "15分钟后",
-                status: "normal",
-                statusText: "一般",
-                color: "yellow",
-                warning: false,
-                countdown: 0,
-                alternative: ""
-            }
-        };
+  <!-- 中间 -->
+  <div class="card">
+    <h3>景区平面监控图</h3>
+    <div class="grid">
+      <div class="region">A区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">B区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">C区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">D区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">E区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">F区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">G区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region">H区域<br><span>传感</span><span>摄像</span></div>
+    </div>
+  </div>
 
-        // 后端API地址
-        const BACKEND_URL = 'http://localhost:5000';
-        
-        // AI分析状态
-        let isAiAnalyzing = false;
-        let aiStream = null;
-        let aiAnalysisInterval = null;
-        
-        // 倒计时定时器存储
-        let countdownIntervals = {};
-        // 自动更新定时器
-        let autoUpdateTimer = null;
-        // 下次更新时间
-        let nextUpdateTime = null;
+  <!-- 右侧 -->
+  <div>
+    <div class="card">
+      <h3>设备状态</h3>
+      <div class="status-item"><span>主控器</span><span class="status-ok">正常运行</span></div>
+      <div class="status-item"><span>通信模块</span><span>信号良好</span></div>
+      <div class="status-item"><span>备用电源</span><span>100%</span></div>
+      <div class="status-item"><span>水泵系统</span><span>待机</span></div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <h3>统计信息</h3>
+      <div class="stat-box">
+        <div class="stat"><strong>156</strong>传感器数</div>
+        <div class="stat"><strong>24</strong>喷淋头数</div>
+        <div class="stat"><strong id="fireCount">0</strong>火警次数</div>
+        <div class="stat"><strong id="nofireCount">0</strong>解除次数</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <h3>快捷操作</h3>
+      <div class="btns">
+        <div class="btn">系统自检</div>
+        <div class="btn stop">紧急停止</div>
+        <div class="btn">重启</div>
+        <div class="btn">生成报告</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        // ==================== 核心功能 ====================
+<!-- 弹窗容器 -->
+<div id="toasts" class="toast-container"></div>
 
-        // 初始化页面
-        function initPage() {
-            console.log("初始化景区监控系统...");
-            
-            // 1. 设置区域交互
-            setupAreaInteractions();
-            
-            // 2. 更新所有数据（包括颜色）
-            updateAllData();
-            
-            // 3. 更新时间显示
-            updateTimeDisplay();
-            
-            // 4. 设置下次更新时间
-            setNextUpdateTime();
-            
-            // 5. 设置刷新按钮
-            document.getElementById('refreshBtn').addEventListener('click', refreshData);
-            
-            // 6. 设置自动更新
-            startAutoUpdate();
-            
-            // 7. 初始化AI分析
-            initAiAnalysis();
-            
-            // 8. 测试后端连接
-            testBackendConnection();
-            
-            console.log("系统初始化完成！");
-        }
-        
-        // 测试后端连接
-        async function testBackendConnection() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/health`);
-                if (response.ok) {
-                    console.log("后端连接成功");
-                    document.getElementById('aiStatusText').innerHTML = '<span style="color:#2ecc71">后端连接正常</span>';
-                }
-            } catch (error) {
-                console.warn("后端连接失败，AI分析将使用模拟模式:", error);
-                document.getElementById('aiStatusText').innerHTML = '<span style="color:#f39c12">后端未连接（模拟模式）</span>';
-            }
-        }
-        
-        // 初始化AI分析
-        function initAiAnalysis() {
-            const startBtn = document.getElementById('startAiAnalysisBtn');
-            
-            startBtn.addEventListener('click', async function() {
-                if (isAiAnalyzing) {
-                    stopAiAnalysis();
-                    return;
-                }
-                
-                try {
-                    // 测试后端连接
-                    const response = await fetch(`${BACKEND_URL}/api/health`);
-                    if (!response.ok) {
-                        throw new Error('后端连接失败');
-                    }
-                    
-                    // 请求摄像头权限
-                    aiStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { width: 320, height: 240 } 
-                    });
-                    
-                    // 创建临时视频元素用于分析
-                    const tempVideo = document.createElement('video');
-                    tempVideo.srcObject = aiStream;
-                    tempVideo.play();
-                    
-                    // 等待视频就绪
-                    await new Promise(resolve => {
-                        tempVideo.onloadedmetadata = resolve;
-                    });
-                    
-                    // 创建画布
-                    const canvas = document.createElement('canvas');
-                    canvas.width = tempVideo.videoWidth;
-                    canvas.height = tempVideo.videoHeight;
-                    const ctx = canvas.getContext('2d');
-                    
-                    // 更新UI状态
-                    isAiAnalyzing = true;
-                    startBtn.innerHTML = '<i class="fas fa-stop"></i> 停止分析';
-                    startBtn.style.background = 'linear-gradient(to right, #e74c3c, #c0392b)';
-                    document.getElementById('aiStatusText').innerHTML = '<span style="color:#2ecc71">AI分析中...</span>';
-                    
-                    showNotification('AI分析已启动', 'success');
-                    
-                    // 开始分析循环
-                    startAiAnalysisLoop(tempVideo, canvas, ctx);
-                    
-                } catch (error) {
-                    console.error('AI分析启动失败:', error);
-                    
-                    // 如果无法获取摄像头，使用模拟分析
-                    if (error.name === 'NotAllowedError' || error.name === 'NotFoundError') {
-                        showNotification('摄像头不可用，使用模拟分析', 'warning');
-                        startSimulatedAiAnalysis();
-                    } else if (error.message.includes('后端连接失败')) {
-                        showNotification('后端连接失败，使用模拟分析', 'warning');
-                        startSimulatedAiAnalysis();
-                    } else {
-                        showNotification(`AI分析启动失败: ${error.message}`, 'error');
-                    }
-                }
-            });
-        }
-        
-        // 开始AI分析循环
-        async function startAiAnalysisLoop(video, canvas, ctx) {
-            let frameCount = 0;
-            
-            async function analyzeFrame() {
-                if (!isAiAnalyzing) return;
-                
-                frameCount++;
-                
-                try {
-                    // 绘制视频帧到画布
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
-                    // 每5帧分析一次
-                    if (frameCount % 5 === 0) {
-                        // 获取图像数据
-                        const imageData = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        // 发送到后端分析
-                        const response = await fetch(`${BACKEND_URL}/api/detect`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                image: imageData,
-                                confidence_threshold: 0.6
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            const result = await response.json();
-                            
-                            // 更新显示
-                            const personCount = result.person_count || 0;
-                            document.getElementById('aiDetectedPeople').textContent = personCount;
-                            
-                            // 获取当前分析区域
-                            const areaId = document.getElementById('aiAnalysisArea').value;
-                            
-                            // 更新对应的景区数据
-                            updateAreaFromAiAnalysis(areaId, personCount);
-                            
-                            // 更新置信度显示
-                            if (result.detections && result.detections.length > 0) {
-                                const avgConfidence = result.detections.reduce((sum, det) => sum + det.confidence, 0) / result.detections.length;
-                                document.getElementById('aiConfidence').textContent = Math.round(avgConfidence * 100) + '%';
-                            }
-                            
-                            // 偶尔记录日志
-                            if (frameCount % 30 === 0) {
-                                console.log(`AI分析: ${personCount}人检测到`);
-                            }
-                        }
-                    }
-                    
-                    // 继续下一帧
-                    requestAnimationFrame(analyzeFrame);
-                    
-                } catch (error) {
-                    console.error('AI分析出错:', error);
-                    // 出错后延迟重试
-                    setTimeout(() => {
-                        if (isAiAnalyzing) {
-                            requestAnimationFrame(analyzeFrame);
-                        }
-                    }, 1000);
-                }
-            }
-            
-            analyzeFrame();
-        }
-        
-        // 根据AI分析结果更新区域数据
-        function updateAreaFromAiAnalysis(areaId, personCount) {
-            const data = areaData[areaId];
-            
-            if (!data) return;
-            
-            // 平滑更新人数（避免突变）
-            const current = data.visitors;
-            const newCount = Math.round(current * 0.7 + personCount * 0.3);
-            
-            data.visitors = Math.min(data.capacity, Math.max(10, newCount));
-            
-            // 重新计算状态
-            const percentage = (data.visitors / data.capacity) * 100;
-            
-            if (percentage < 70) {
-                data.status = "comfortable";
-                data.statusText = "舒适";
-                data.color = "green";
-                data.queueTime = Math.floor(Math.random() * 5) + 1;
-                data.recommendedTime = "现在";
-                data.warning = false;
-            } else if (percentage >= 70 && percentage <= 85) {
-                data.status = "normal";
-                data.statusText = "一般";
-                data.color = "yellow";
-                data.queueTime = Math.floor(Math.random() * 10) + 5;
-                data.recommendedTime = "15分钟后";
-                data.warning = false;
-            } else {
-                data.status = "crowded";
-                data.statusText = percentage > 95 ? "已达上限" : "拥挤";
-                data.color = "red";
-                data.queueTime = Math.floor(Math.random() * 15) + 10;
-                data.recommendedTime = "30分钟后";
-                
-                if (areaId === 'B' && percentage > 95) {
-                    data.warning = true;
-                    if (!data.countdown || data.countdown <= 0) {
-                        data.countdown = 20;
-                    }
-                } else {
-                    data.warning = false;
-                }
-            }
-            
-            // 更新显示
-            updateAllData();
-        }
-        
-        // 停止AI分析
-        function stopAiAnalysis() {
-            isAiAnalyzing = false;
-            
-            const startBtn = document.getElementById('startAiAnalysisBtn');
-            startBtn.innerHTML = '<i class="fas fa-play"></i> 启动分析';
-            startBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
-            
-            document.getElementById('aiStatusText').innerHTML = '<span style="color:#7f8c8d">已停止</span>';
-            
-            // 停止视频流
-            if (aiStream) {
-                aiStream.getTracks().forEach(track => track.stop());
-                aiStream = null;
-            }
-            
-            // 清除分析间隔
-            if (aiAnalysisInterval) {
-                clearInterval(aiAnalysisInterval);
-                aiAnalysisInterval = null;
-            }
-            
-            showNotification('AI分析已停止', 'info');
-        }
-        
-        // 模拟AI分析（备用）
-        function startSimulatedAiAnalysis() {
-            isAiAnalyzing = true;
-            
-            const startBtn = document.getElementById('startAiAnalysisBtn');
-            startBtn.innerHTML = '<i class="fas fa-stop"></i> 停止分析';
-            startBtn.style.background = 'linear-gradient(to right, #e74c3c, #c0392b)';
-            
-            document.getElementById('aiStatusText').innerHTML = '<span style="color:#f39c12">模拟分析中...</span>';
-            
-            let simulatedCount = 0;
-            let simulatedFrame = 0;
-            
-            aiAnalysisInterval = setInterval(() => {
-                if (!isAiAnalyzing) {
-                    clearInterval(aiAnalysisInterval);
-                    return;
-                }
-                
-                simulatedFrame++;
-                
-                // 模拟检测人数
-                simulatedCount = Math.floor(Math.random() * 30) + 5;
-                
-                // 偶尔改变人数
-                if (simulatedFrame % 10 === 0) {
-                    simulatedCount = Math.floor(Math.random() * 40) + 10;
-                }
-                
-                document.getElementById('aiDetectedPeople').textContent = simulatedCount;
-                document.getElementById('aiConfidence').textContent = Math.floor(Math.random() * 15) + 85 + '%';
-                
-                // 获取当前分析区域
-                const areaId = document.getElementById('aiAnalysisArea').value;
-                
-                // 更新对应的景区数据
-                updateAreaFromAiAnalysis(areaId, simulatedCount);
-                
-                // 偶尔显示通知
-                if (simulatedFrame % 30 === 0) {
-                    console.log(`模拟AI分析: ${simulatedCount}人检测到`);
-                }
-                
-            }, 1000); // 每秒更新一次
-        }
-        
-        // 从后端获取数据
-        async function fetchDataFromBackend() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/scenic-data`);
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // 更新本地数据
-                    Object.keys(data.areas || {}).forEach(areaId => {
-                        if (areaData[areaId]) {
-                            const remoteData = data.areas[areaId];
-                            
-                            areaData[areaId].visitors = remoteData.visitors;
-                            areaData[areaId].status = remoteData.status;
-                            
-                            // 根据状态更新颜色
-                            if (remoteData.status === 'comfortable') {
-                                areaData[areaId].color = 'green';
-                                areaData[areaId].statusText = '舒适';
-                            } else if (remoteData.status === 'normal') {
-                                areaData[areaId].color = 'yellow';
-                                areaData[areaId].statusText = '一般';
-                            } else if (remoteData.status === 'crowded') {
-                                areaData[areaId].color = 'red';
-                                areaData[areaId].statusText = '拥挤';
-                            } else if (remoteData.status === 'warning') {
-                                areaData[areaId].color = 'red';
-                                areaData[areaId].statusText = '已达上限';
-                                areaData[areaId].warning = true;
-                            }
-                        }
-                    });
-                    
-                    // 更新总人数
-                    if (data.total_visitors) {
-                        document.getElementById('totalVisitors').textContent = data.total_visitors;
-                    }
-                    
-                    // 更新显示
-                    updateAllData();
-                    
-                    console.log('从后端更新数据成功');
-                }
-            } catch (error) {
-                console.log('后端连接失败，使用本地数据:', error);
-                // 如果后端不可用，继续使用本地模拟数据
-                simulateDataChange();
-            }
-        }
+<!-- MQTT.js -->
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+  const logEl=document.getElementById("log")
+  const toastContainer=document.getElementById("toasts")
+  const fireCountEl=document.getElementById("fireCount")
+  const nofireCountEl=document.getElementById("nofireCount")
+  const TOPIC="warehouse/alarm"
+  let client=null
+  let fireCount=0, nofireCount=0
 
-        // 更新所有数据
-        function updateAllData() {
-            updateAreaColors();
-            updateStatistics();
-            updateTooltips();
-            
-            // 检查B区是否需要警告
-            checkWarning();
-        }
+  function log(msg){
+    const t=new Date().toLocaleTimeString()
+    logEl.insertAdjacentHTML("afterbegin",`<div>[${t}] ${msg}</div>`)
+  }
 
-        // 设置区域颜色
-        function updateAreaColors() {
-            ['A', 'B', 'C', 'D'].forEach(areaId => {
-                const area = document.getElementById(`area${areaId}`);
-                if (!area) return;
-                
-                const data = areaData[areaId];
-                
-                // 移除所有颜色类
-                area.classList.remove('area-green', 'area-yellow', 'area-red', 'area-warning');
-                
-                // 添加对应的颜色类
-                if (data.color === 'green') {
-                    area.classList.add('area-green');
-                } else if (data.color === 'yellow') {
-                    area.classList.add('area-yellow');
-                } else if (data.color === 'red') {
-                    area.classList.add('area-red');
-                }
-                
-                // 直接设置内联样式（确保显示）
-                if (data.color === 'green') {
-                    area.style.fill = '#2ecc71';
-                } else if (data.color === 'yellow') {
-                    area.style.fill = '#f1c40f';
-                } else if (data.color === 'red') {
-                    area.style.fill = '#e74c3c';
-                }
-                
-                // 设置边框
-                area.style.stroke = 'white';
-                area.style.strokeWidth = '3';
-                area.style.opacity = '0.9';
-            });
-        }
+  function connect(){
+    const url="ws://broker.emqx.io:8083/mqtt"
+    const clientId="web-"+Math.random().toString(16).slice(2,8)
+    client=mqtt.connect(url,{clientId})
+    client.on("connect",()=>{ log("已连接 "+url); client.subscribe(TOPIC) })
+    client.on("message",(topic,payload)=>{
+      const msg=payload.toString().trim()
+      log(`收到 ${topic}: ${msg}`)
+      handleMsg(msg)
+    })
+  }
 
-        // 设置区域交互
-        function setupAreaInteractions() {
-            const areas = document.querySelectorAll('.area');
-            
-            areas.forEach(area => {
-                // 点击事件
-                area.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const areaId = this.getAttribute('data-area');
-                    showAreaDetails(areaId);
-                });
-                
-                // 悬停效果
-                area.addEventListener('mouseenter', function() {
-                    this.style.filter = 'brightness(1.15)';
-                    this.style.transform = 'scale(1.02)';
-                    this.style.strokeWidth = '4';
-                });
-                
-                area.addEventListener('mouseleave', function() {
-                    this.style.filter = '';
-                    this.style.transform = '';
-                    this.style.strokeWidth = '3';
-                });
-            });
-        }
+  function handleMsg(msg){
+    if(msg.toLowerCase()==="fire"){ addFireToast() }
+    else if(msg.toLowerCase()==="nofire"){ clearFireToasts(); addNoFireToast() }
+  }
 
-        // 更新tooltip
-        function updateTooltips() {
-            ['A', 'B', 'C', 'D'].forEach(areaId => {
-                const area = document.getElementById(`area${areaId}`);
-                if (!area) return;
-                
-                const data = areaData[areaId];
-                const percentage = Math.round((data.visitors / data.capacity) * 100);
-                
-                area.setAttribute('title', 
-                    `${data.name} (${areaId}区)\n` +
-                    `当前人数: ${data.visitors}/${data.capacity} (${percentage}%)\n` +
-                    `状态: ${data.statusText}\n` +
-                    `预计排队: ${data.queueTime}分钟\n` +
-                    `点击查看详情`
-                );
-            });
-        }
+  function addFireToast(){
+    // 让已有 fire 变 old
+    toastContainer.querySelectorAll(".toast.fire").forEach(t=>{
+      if(!t.classList.contains("old")){
+        t.classList.add("old")
+        setTimeout(()=>t.remove(),5000)
+      }
+    })
+    // 新 fire 放最下面
+    const toast=document.createElement("div")
+    toast.className="toast fire"
+    toast.textContent="🔥 火警!"
+    toastContainer.appendChild(toast)
 
-        // 检查B区警告
-        function checkWarning() {
-            const areaB = document.getElementById('areaB');
-            const data = areaData.B;
-            
-            if (data.warning) {
-                areaB.classList.add('area-warning');
-                startCountdown('B', data.countdown);
-            } else {
-                areaB.classList.remove('area-warning');
-                removeCountdown('B');
-            }
-        }
+    fireCount++
+    fireCountEl.textContent=fireCount
+  }
 
-        // 启动倒计时
-        function startCountdown(areaId, minutes) {
-            removeCountdown(areaId);
-            
-            let remaining = minutes * 60;
-            const area = document.getElementById(`area${areaId}`);
-            if (!area) return;
-            
-            // 创建倒计时显示
-            const bbox = area.getBBox();
-            const svg = area.closest('svg');
-            
-            const countdownElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            countdownElement.setAttribute("id", `countdown-${areaId}`);
-            countdownElement.setAttribute("x", bbox.x + bbox.width / 2);
-            countdownElement.setAttribute("y", bbox.y - 10);
-            countdownElement.setAttribute("text-anchor", "middle");
-            countdownElement.setAttribute("style", "fill: white; font-weight: bold; font-size: 14px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);");
-            countdownElement.textContent = `预计${minutes}分钟后恢复`;
-            
-            svg.appendChild(countdownElement);
-            
-            // 启动定时器
-            const interval = setInterval(() => {
-                remaining--;
-                
-                if (remaining <= 0) {
-                    clearInterval(interval);
-                    removeCountdown(areaId);
-                    
-                    // 更新B区状态
-                    areaData.B.warning = false;
-                    areaData.B.countdown = 0;
-                    updateAllData();
-                    return;
-                }
-                
-                const mins = Math.floor(remaining / 60);
-                const secs = remaining % 60;
-                countdownElement.textContent = `预计${mins}分${secs}秒后恢复`;
-            }, 1000);
-            
-            countdownIntervals[areaId] = interval;
-        }
+  function clearFireToasts(){
+    toastContainer.querySelectorAll(".toast.fire").forEach(t=>t.remove())
+  }
 
-        // 移除倒计时
-        function removeCountdown(areaId) {
-            const element = document.getElementById(`countdown-${areaId}`);
-            if (element) element.remove();
-            
-            if (countdownIntervals[areaId]) {
-                clearInterval(countdownIntervals[areaId]);
-                delete countdownIntervals[areaId];
-            }
-        }
+  function addNoFireToast(){
+    // 清除已有 nofire 弹窗
+    toastContainer.querySelectorAll(".toast.nofire").forEach(t => t.remove())
 
-        // ==================== 弹窗功能 ====================
+    // 添加新的 nofire 弹窗
+    const toast = document.createElement("div")
+    toast.className = "toast nofire"
+    toast.textContent = "✅ 安全 (No Fire)"
+    toastContainer.appendChild(toast)
+    setTimeout(() => toast.remove(), 10000)
 
-        // 显示区域详情
-        function showAreaDetails(areaId) {
-            const data = areaData[areaId];
-            const percentage = Math.round((data.visitors / data.capacity) * 100);
-            
-            // 创建模态框
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'modal-overlay';
-            
-            // 状态指示器
-            let statusIndicator = '';
-            if (data.color === 'green') {
-                statusIndicator = `<span class="status-indicator status-green">${data.statusText} 🟢</span>`;
-            } else if (data.color === 'yellow') {
-                statusIndicator = `<span class="status-indicator status-yellow">${data.statusText} 🟡</span>`;
-            } else {
-                statusIndicator = `<span class="status-indicator status-red">${data.statusText} 🔴</span>`;
-            }
-            
-            // 警告HTML
-            let warningHTML = '';
-            if (data.warning) {
-                warningHTML = `
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>⚠️ 人流警告</span>
-                        </div>
-                        <div class="warning-content">
-                            <p>${data.name}（${areaId}区）人数已达上限</p>
-                            <p>当前不建议前往</p>
-                            <p>预计等候时间: ${data.queueTime}分钟</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // 推荐HTML
-            let recommendationHTML = '';
-            if (data.alternative) {
-                const altAreaId = data.alternative.charAt(0);
-                const altData = areaData[altAreaId] || {};
-                recommendationHTML = `
-                    <div class="recommendation">
-                        <div class="recommendation-title">
-                            <i class="fas fa-lightbulb"></i>
-                            <span>推荐替代</span>
-                        </div>
-                        <p>${data.alternative}当前${altData.statusText || "舒适"}</p>
-                    </div>
-                `;
-            }
-            
-            modalOverlay.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <div class="modal-title">${data.name}（${areaId}区）详情</div>
-                        <button class="modal-close">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="detail-item">
-                            <span class="detail-label">当前人数</span>
-                            <span class="detail-value">${data.visitors}/${data.capacity}人 (${percentage}%)</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">舒适度</span>
-                            <span class="detail-value">${statusIndicator}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">预计排队时间</span>
-                            <span class="detail-value">${data.queueTime}分钟</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">建议前往时间</span>
-                            <span class="detail-value">${data.recommendedTime}</span>
-                        </div>
-                        
-                        ${warningHTML}
-                        ${recommendationHTML}
-                        
-                        <div style="margin-top: 20px; font-size: 12px; color: #95a5a6; text-align: center;">
-                            <i class="fas fa-info-circle"></i> 数据每2分钟更新一次
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modalOverlay);
-            
-            // 关闭功能
-            const closeBtn = modalOverlay.querySelector('.modal-close');
-            closeBtn.addEventListener('click', () => {
-                modalOverlay.remove();
-            });
-            
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) {
-                    modalOverlay.remove();
-                }
-            });
-            
-            // ESC键关闭
-            const closeOnEsc = (e) => {
-                if (e.key === 'Escape') {
-                    modalOverlay.remove();
-                    document.removeEventListener('keydown', closeOnEsc);
-                }
-            };
-            document.addEventListener('keydown', closeOnEsc);
-        }
+    nofireCount++
+    nofireCountEl.textContent = nofireCount
+  }
 
-        // ==================== 数据统计 ====================
+  // 时间刷新
+  function updateTime(){
+    const now=new Date()
+    document.getElementById("time").textContent=
+      now.getFullYear()+"/"+(now.getMonth()+1)+"/"+now.getDate()+" "+
+      now.toLocaleTimeString()
+  }
+  setInterval(updateTime,1000); updateTime()
 
-        // 更新统计数据
-        function updateStatistics() {
-            let totalVisitors = 0;
-            let comfortableCount = 0;
-            
-            Object.keys(areaData).forEach(key => {
-                const data = areaData[key];
-                totalVisitors += data.visitors;
-                
-                if (data.status === "comfortable") {
-                    comfortableCount++;
-                }
-                
-                // 更新右侧状态
-                updateStatusItem(key, data);
-            });
-            
-            // 更新总人数
-            document.getElementById('totalVisitors').textContent = totalVisitors;
-            document.getElementById('comfortableAreas').textContent = comfortableCount;
-            
-            // 更新时间
-            updateCurrentTime();
-        }
-
-        // 更新右侧状态项
-        function updateStatusItem(areaId, data) {
-            const statusItem = document.querySelector(`.status-item[data-area="${areaId}"]`);
-            if (!statusItem) return;
-            
-            // 状态指示器
-            const indicator = statusItem.querySelector('.status-indicator');
-            if (indicator) {
-                indicator.className = 'status-indicator';
-                if (data.color === 'green') {
-                    indicator.classList.add('status-green');
-                } else if (data.color === 'yellow') {
-                    indicator.classList.add('status-yellow');
-                } else {
-                    indicator.classList.add('status-red');
-                }
-                indicator.textContent = data.statusText;
-            }
-            
-            // 描述
-            const desc = statusItem.querySelector('.status-desc');
-            if (desc) {
-                const percentage = Math.round((data.visitors / data.capacity) * 100);
-                desc.innerHTML = `当前人数: <strong>${data.visitors}/${data.capacity}</strong> (${percentage}%)`;
-            }
-            
-            // 排队时间
-            const queueSpan = document.getElementById(`queue${areaId}`);
-            if (queueSpan) {
-                queueSpan.textContent = data.queueTime;
-            }
-        }
-
-        // 更新时间显示
-        function updateTimeDisplay() {
-            updateCurrentTime();
-            updateLastUpdateTime();
-        }
-
-        // 更新当前时间
-        function updateCurrentTime() {
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                           now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('updateTime').textContent = timeStr;
-        }
-
-        // 更新最后更新时间
-        function updateLastUpdateTime() {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('zh-CN');
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                           now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('lastUpdate').textContent = `${dateStr} ${timeStr}`;
-        }
-
-        // ==================== 自动更新 ====================
-
-        // 设置下次更新时间
-        function setNextUpdateTime() {
-            const now = new Date();
-            nextUpdateTime = new Date(now.getTime() + 2 * 60 * 1000); // 2分钟后
-            updateNextUpdateTime();
-            startUpdateCountdown();
-        }
-
-        // 更新下次更新时间显示
-        function updateNextUpdateTime() {
-            if (!nextUpdateTime) return;
-            
-            const now = new Date();
-            const diffMs = nextUpdateTime - now;
-            const diffMins = Math.max(0, Math.floor(diffMs / 60000));
-            const diffSecs = Math.max(0, Math.floor((diffMs % 60000) / 1000));
-            
-            document.getElementById('nextUpdate').textContent = 
-                `${diffMins}:${diffSecs.toString().padStart(2, '0')}`;
-            document.getElementById('nextUpdateTime').textContent = 
-                diffMins > 0 ? `${diffMins}分钟后` : `${diffSecs}秒后`;
-        }
-
-        // 启动更新倒计时
-        function startUpdateCountdown() {
-            if (autoUpdateTimer) clearInterval(autoUpdateTimer);
-            
-            autoUpdateTimer = setInterval(() => {
-                updateNextUpdateTime();
-                
-                const now = new Date();
-                if (now >= nextUpdateTime) {
-                    refreshData();
-                    setNextUpdateTime();
-                }
-            }, 1000);
-        }
-
-        // 启动自动更新
-        function startAutoUpdate() {
-            // 每30秒检查一次数据变化
-            setInterval(() => {
-                simulateDataChange();
-            }, 30000);
-        }
-
-        // ==================== 数据刷新 ====================
-
-        // 刷新数据（按钮点击）
-        function refreshData() {
-            simulateDataChange();
-            setNextUpdateTime();
-            showNotification('数据已刷新！', 'success');
-        }
-
-        // 模拟数据变化
-        function simulateDataChange() {
-            Object.keys(areaData).forEach(key => {
-                const area = areaData[key];
-                
-                // 模拟人数变化
-                const change = Math.floor(Math.random() * 20) - 10;
-                area.visitors = Math.max(10, Math.min(area.capacity, area.visitors + change));
-                
-                // 重新计算状态
-                const percentage = (area.visitors / area.capacity) * 100;
-                
-                if (percentage < 70) {
-                    area.status = "comfortable";
-                    area.statusText = "舒适";
-                    area.color = "green";
-                    area.queueTime = Math.floor(Math.random() * 5) + 1;
-                    area.recommendedTime = "现在";
-                    area.warning = false;
-                } else if (percentage >= 70 && percentage <= 85) {
-                    area.status = "normal";
-                    area.statusText = "一般";
-                    area.color = "yellow";
-                    area.queueTime = Math.floor(Math.random() * 10) + 5;
-                    area.recommendedTime = "15分钟后";
-                    area.warning = false;
-                } else {
-                    area.status = "crowded";
-                    area.statusText = percentage > 95 ? "已达上限" : "拥挤";
-                    area.color = "red";
-                    area.queueTime = Math.floor(Math.random() * 15) + 10;
-                    area.recommendedTime = "30分钟后";
-                    
-                    // B区特殊处理
-                    if (key === 'B' && percentage > 95) {
-                        area.warning = true;
-                        if (!area.countdown || area.countdown <= 0) {
-                            area.countdown = 20;
-                        }
-                    } else {
-                        area.warning = false;
-                    }
-                }
-            });
-            
-            // 更新显示
-            updateAllData();
-            updateLastUpdateTime();
-        }
-
-        // ==================== 通知功能 ====================
-
-        // 显示通知
-        function showNotification(message, type = 'success') {
-            const oldNotification = document.querySelector('.notification');
-            if (oldNotification) oldNotification.remove();
-            
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // ==================== 微信优化 ====================
-
-        function checkWeChatBrowser() {
-            const ua = navigator.userAgent.toLowerCase();
-            const isWeChat = ua.indexOf('micromessenger') !== -1;
-            
-            if (isWeChat) {
-                // 添加微信优化样式
-                const style = document.createElement('style');
-                style.textContent = `
-                    body {
-                        -webkit-overflow-scrolling: touch !important;
-                        -webkit-tap-highlight-color: transparent;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-        }
-
-        // ==================== 启动 ====================
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initPage();
-            checkWeChatBrowser();
-        });
-    </script>
+  window.addEventListener("load",connect)
+  window.addEventListener("beforeunload",()=>{ if(client) client.end(true) })
+</script>
 </body>
 </html>
