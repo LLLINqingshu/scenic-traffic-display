@@ -39,10 +39,20 @@
   .region {
     background:rgba(0,30,60,0.8);
     border-radius:6px; padding:20px; text-align:center;
+    transition: all 0.3s ease; /* 添加过渡效果 */
+  }
+  .region.fire-alarm {
+    background: linear-gradient(145deg, #ff3333, #cc0000); /* 火灾警报时的红色渐变 */
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 50, 50, 0.8);
   }
   .region span {
     display:inline-block; margin:6px; padding:12px;
     background:#00cc88; border-radius:50%; color:#fff;
+    transition: all 0.3s ease; /* 添加过渡效果 */
+  }
+  .region.fire-alarm span {
+    background: #ff6666; /* 火灾警报时span的颜色 */
   }
   .stat-box { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .stat {
@@ -54,8 +64,23 @@
   .btn {
     padding:12px; border-radius:6px; text-align:center; cursor:pointer;
     background:#004488; color:#fff; font-weight:600;
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+  .btn:hover {
+    background:#0055aa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
   .btn.stop { background:#cc2222; }
+  .btn.stop:hover { background:#dd3333; }
+  .btn.selfcheck { background:#0077cc; }
+  .btn.restart { background:#009933; }
+  .btn.report { background:#8844aa; }
   .log { font-size:13px; background:#001b33; padding:10px; border-radius:6px; max-height:200px; overflow:auto; }
 
   /* 左下角弹窗容器 */
@@ -76,6 +101,75 @@
   .toast.fire { background:linear-gradient(90deg,#ff3b3b,#ff6a6a); }
   .toast.fire.old { background:#663333; color:#ffaaaa; }
   .toast.nofire { background:linear-gradient(90deg,#28a745,#5cd65c); }
+  
+  /* 操作成功提示 */
+  .toast.success { background:linear-gradient(90deg,#28a745,#5cd65c); }
+  
+  /* 确认对话框 */
+  .confirm-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 30, 60, 0.95);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: none;
+    min-width: 320px;
+    border: 1px solid #004488;
+  }
+  .confirm-dialog.active {
+    display: block;
+    animation: fadeIn .3s forwards;
+  }
+  .confirm-dialog h4 {
+    margin: 0 0 16px;
+    color: #4dc3ff;
+    font-size: 18px;
+  }
+  .confirm-dialog p {
+    margin: 0 0 20px;
+    color: #cce6ff;
+  }
+  .confirm-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  .confirm-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .confirm-btn.cancel {
+    background: #666;
+    color: #fff;
+  }
+  .confirm-btn.confirm {
+    background: #cc2222;
+    color: #fff;
+  }
+  .confirm-btn.confirm.green {
+    background: #009933;
+  }
+  
+  /* 遮罩层 */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: none;
+  }
+  .overlay.active {
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -104,14 +198,14 @@
   <div class="card">
     <h3>景区平面监控图</h3>
     <div class="grid">
-      <div class="region">A区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">B区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">C区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">D区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">E区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">F区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">G区域<br><span>传感</span><span>摄像</span></div>
-      <div class="region">H区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-a">A区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-b">B区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-c">C区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-d">D区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-e">E区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-f">F区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-g">G区域<br><span>传感</span><span>摄像</span></div>
+      <div class="region" id="region-h">H区域<br><span>传感</span><span>摄像</span></div>
     </div>
   </div>
 
@@ -136,10 +230,10 @@
     <div class="card" style="margin-top:12px;">
       <h3>快捷操作</h3>
       <div class="btns">
-        <div class="btn">系统自检</div>
-        <div class="btn stop">紧急停止</div>
-        <div class="btn">重启</div>
-        <div class="btn">生成报告</div>
+        <div class="btn selfcheck" id="btnSelfCheck">系统自检</div>
+        <div class="btn stop" id="btnEmergencyStop">紧急停止</div>
+        <div class="btn restart" id="btnRestart">重启</div>
+        <div class="btn report" id="btnGenerateReport">生成报告</div>
       </div>
     </div>
   </div>
@@ -147,6 +241,19 @@
 
 <!-- 弹窗容器 -->
 <div id="toasts" class="toast-container"></div>
+
+<!-- 确认对话框 -->
+<div id="confirmDialog" class="confirm-dialog">
+  <h4 id="confirmTitle">确认操作</h4>
+  <p id="confirmMessage">您确定要执行此操作吗？</p>
+  <div class="confirm-btns">
+    <div class="confirm-btn cancel" id="confirmCancel">取消</div>
+    <div class="confirm-btn confirm" id="confirmOk">确认</div>
+  </div>
+</div>
+
+<!-- 遮罩层 -->
+<div id="overlay" class="overlay"></div>
 
 <!-- MQTT.js -->
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
@@ -158,6 +265,14 @@
   const TOPIC="warehouse/alarm"
   let client=null
   let fireCount=0, nofireCount=0
+  
+  // 系统状态变量
+  let systemStatus = "正常"
+  let pumpPressure = "1.2MPa"
+  let avgTemperature = "25.4℃"
+  let humidity = "2.5%"
+  let isSystemStopped = false
+  let isSelfChecking = false
 
   function log(msg){
     const t=new Date().toLocaleTimeString()
@@ -177,8 +292,27 @@
   }
 
   function handleMsg(msg){
-    if(msg.toLowerCase()==="fire"){ addFireToast() }
-    else if(msg.toLowerCase()==="nofire"){ clearFireToasts(); addNoFireToast() }
+    if(msg.toLowerCase()==="fire"){ 
+      addFireToast() 
+      setRegionFireAlarm('a', true) // 设置A区域为火灾预警状态
+    }
+    else if(msg.toLowerCase()==="nofire"){ 
+      clearFireToasts(); 
+      addNoFireToast() 
+      setRegionFireAlarm('a', false) // 取消A区域的火灾预警状态
+    }
+  }
+
+  // 设置或取消区域的火灾预警状态
+  function setRegionFireAlarm(regionId, isFire) {
+    const regionElement = document.getElementById(`region-${regionId}`)
+    if (regionElement) {
+      if (isFire) {
+        regionElement.classList.add('fire-alarm')
+      } else {
+        regionElement.classList.remove('fire-alarm')
+      }
+    }
   }
 
   function addFireToast(){
@@ -192,7 +326,7 @@
     // 新 fire 放最下面
     const toast=document.createElement("div")
     toast.className="toast fire"
-    toast.textContent="🔥 火警!"
+    toast.textContent="🔥 火警! A区域检测到火灾"
     toastContainer.appendChild(toast)
 
     fireCount++
@@ -210,12 +344,270 @@
     // 添加新的 nofire 弹窗
     const toast = document.createElement("div")
     toast.className = "toast nofire"
-    toast.textContent = "✅ 安全 (No Fire)"
+    toast.textContent = "✅ 安全  - 火警解除"
     toastContainer.appendChild(toast)
     setTimeout(() => toast.remove(), 10000)
 
     nofireCount++
     nofireCountEl.textContent = nofireCount
+  }
+  
+  // 添加操作成功提示
+  function addSuccessToast(message) {
+    // 清除已有的相同类型的弹窗
+    toastContainer.querySelectorAll(".toast.success").forEach(t => t.remove())
+    
+    const toast = document.createElement("div")
+    toast.className = "toast success"
+    toast.textContent = message
+    toastContainer.appendChild(toast)
+    setTimeout(() => toast.remove(), 3000)
+  }
+  
+  // 更新系统状态显示
+  function updateSystemStatus() {
+    const statusItems = document.querySelectorAll(".status-item span")
+    statusItems[0].nextElementSibling.textContent = systemStatus
+    statusItems[0].nextElementSibling.className = systemStatus === "正常" ? "status-ok" : "status-bad"
+    statusItems[1].nextElementSibling.textContent = avgTemperature
+    statusItems[2].nextElementSibling.textContent = humidity
+    statusItems[3].nextElementSibling.textContent = pumpPressure
+    
+    // 更新设备状态
+    const deviceStatusItems = document.querySelectorAll(".card:nth-child(1) .status-item span")
+    deviceStatusItems[0].nextElementSibling.textContent = isSystemStopped ? "已停止" : "正常运行"
+    deviceStatusItems[0].nextElementSibling.className = isSystemStopped ? "status-bad" : "status-ok"
+    deviceStatusItems[3].nextElementSibling.textContent = isSystemStopped ? "已关闭" : "待机"
+  }
+  
+  // 系统自检功能
+  function systemSelfCheck() {
+    if (isSelfChecking) {
+      log("系统自检正在进行中，请稍候...")
+      return
+    }
+    
+    isSelfChecking = true
+    log("开始系统自检...")
+    
+    // 模拟自检过程
+    const checkSteps = [
+      {name: "检查传感器网络", time: 1000},
+      {name: "检查通信模块", time: 800},
+      {name: "检查备用电源", time: 600},
+      {name: "检查水泵系统", time: 1200},
+      {name: "检查灭火装置", time: 1000}
+    ]
+    
+    let stepIndex = 0
+    
+    function performNextStep() {
+      if (stepIndex >= checkSteps.length) {
+        // 自检完成
+        log("系统自检完成，所有设备正常")
+        isSelfChecking = false
+        addSuccessToast("✅ 系统自检完成，所有设备正常")
+        return
+      }
+      
+      const step = checkSteps[stepIndex]
+      log(`正在${step.name}...`)
+      
+      setTimeout(() => {
+        log(`${step.name}完成，状态正常`)
+        stepIndex++
+        performNextStep()
+      }, step.time)
+    }
+    
+    performNextStep()
+  }
+  
+  // 紧急停止功能
+  function emergencyStop() {
+    if (isSystemStopped) {
+      log("系统已经处于停止状态")
+      return
+    }
+    
+    showConfirmDialog(
+      "紧急停止系统",
+      "您确定要紧急停止整个系统吗？这将停止所有自动灭火功能。",
+      () => {
+        isSystemStopped = true
+        systemStatus = "已停止"
+        pumpPressure = "0.0MPa"
+        log("系统已紧急停止")
+        updateSystemStatus()
+        addSuccessToast("🛑 系统已紧急停止")
+        
+        // 模拟5秒后自动恢复
+        setTimeout(() => {
+          if (isSystemStopped) {
+            isSystemStopped = false
+            systemStatus = "正常"
+            pumpPressure = "1.2MPa"
+            log("系统已自动恢复运行")
+            updateSystemStatus()
+            addSuccessToast("🔄 系统已自动恢复运行")
+          }
+        }, 5000)
+      }
+    )
+  }
+  
+  // 重启系统功能
+  function restartSystem() {
+    if (isSystemStopped) {
+      log("系统已停止，正在重启...")
+      isSystemStopped = false
+      systemStatus = "重启中..."
+      pumpPressure = "0.0MPa"
+      updateSystemStatus()
+      
+      // 模拟重启过程
+      setTimeout(() => {
+        systemStatus = "正常"
+        pumpPressure = "1.2MPa"
+        log("系统重启完成")
+        updateSystemStatus()
+        addSuccessToast("🔄 系统重启完成")
+      }, 3000)
+    } else {
+      showConfirmDialog(
+        "重启系统",
+        "您确定要重启系统吗？重启过程需要约3秒钟。",
+        () => {
+          log("开始重启系统...")
+          systemStatus = "重启中..."
+          pumpPressure = "0.0MPa"
+          updateSystemStatus()
+          
+          // 模拟重启过程
+          setTimeout(() => {
+            systemStatus = "正常"
+            pumpPressure = "1.2MPa"
+            log("系统重启完成")
+            updateSystemStatus()
+            addSuccessToast("🔄 系统重启完成")
+          }, 3000)
+        }
+      )
+    }
+  }
+  
+  // 生成报告功能
+  function generateReport() {
+    log("正在生成系统报告...")
+    
+    // 模拟报告生成过程
+    setTimeout(() => {
+      const reportContent = `
+        景区消防系统报告
+        生成时间: ${new Date().toLocaleString()}
+        
+        系统状态: ${systemStatus}
+        火警次数: ${fireCount}
+        解除次数: ${nofireCount}
+        传感器数: 156
+        喷淋头数: 24
+        平均温度: ${avgTemperature}
+        湿度: ${humidity}
+        灭火泵压力: ${pumpPressure}
+        
+        最近事件:
+        ${getRecentLogs(5)}
+      `
+      
+      log("系统报告已生成")
+      
+      // 在实际应用中，这里可以调用下载功能
+      // 模拟下载报告
+      const blob = new Blob([reportContent], {type: 'text/plain'})
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `消防系统报告_${new Date().toISOString().slice(0,10)}.txt`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      addSuccessToast("📄 系统报告已生成并下载")
+    }, 1500)
+  }
+  
+  // 获取最近的日志
+  function getRecentLogs(count) {
+    const logItems = logEl.querySelectorAll('div')
+    let result = ''
+    const limit = Math.min(count, logItems.length)
+    
+    for (let i = 0; i < limit; i++) {
+      result += logItems[i].textContent + '\n'
+    }
+    
+    return result
+  }
+  
+  // 显示确认对话框
+  function showConfirmDialog(title, message, confirmCallback) {
+    const dialog = document.getElementById('confirmDialog')
+    const overlay = document.getElementById('overlay')
+    const titleEl = document.getElementById('confirmTitle')
+    const messageEl = document.getElementById('confirmMessage')
+    const cancelBtn = document.getElementById('confirmCancel')
+    const confirmBtn = document.getElementById('confirmOk')
+    
+    titleEl.textContent = title
+    messageEl.textContent = message
+    
+    // 设置确认按钮样式
+    if (title.includes('停止')) {
+      confirmBtn.className = 'confirm-btn confirm'
+    } else {
+      confirmBtn.className = 'confirm-btn confirm green'
+    }
+    
+    // 显示对话框和遮罩层
+    dialog.classList.add('active')
+    overlay.classList.add('active')
+    
+    // 移除之前的事件监听器
+    const cancelHandler = () => {
+      dialog.classList.remove('active')
+      overlay.classList.remove('active')
+      log("操作已取消")
+    }
+    
+    const confirmHandler = () => {
+      dialog.classList.remove('active')
+      overlay.classList.remove('active')
+      confirmCallback()
+    }
+    
+    // 添加新的事件监听器
+    cancelBtn.onclick = cancelHandler
+    confirmBtn.onclick = confirmHandler
+    overlay.onclick = cancelHandler
+    
+    // ESC键关闭对话框
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        cancelHandler()
+        document.removeEventListener('keydown', escHandler)
+      }
+    }
+    
+    document.addEventListener('keydown', escHandler)
+  }
+  
+  // 绑定按钮事件
+  function bindButtonEvents() {
+    document.getElementById('btnSelfCheck').addEventListener('click', systemSelfCheck)
+    document.getElementById('btnEmergencyStop').addEventListener('click', emergencyStop)
+    document.getElementById('btnRestart').addEventListener('click', restartSystem)
+    document.getElementById('btnGenerateReport').addEventListener('click', generateReport)
   }
 
   // 时间刷新
@@ -227,7 +619,13 @@
   }
   setInterval(updateTime,1000); updateTime()
 
-  window.addEventListener("load",connect)
+  window.addEventListener("load", () => {
+    connect()
+    bindButtonEvents()
+    // 初始化日志
+    log("系统启动完成，监控中心已就绪")
+    log("等待连接MQTT服务器...")
+  })
   window.addEventListener("beforeunload",()=>{ if(client) client.end(true) })
 </script>
 </body>
